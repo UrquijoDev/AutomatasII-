@@ -16,6 +16,12 @@ public class Sintactico {
     public void sintaxis() {
         p = cabeza;
 
+          // Verificar si la lista de tokens está vacía
+    if (p == null) {
+        resultado = "Error: No hay tokens para analizar (archivo vacío).\n";
+        errorSintactico = true;
+        return;
+    }
         if (p.idToken == 216) //package 
         {
             if (p.sig.idToken == 100) {

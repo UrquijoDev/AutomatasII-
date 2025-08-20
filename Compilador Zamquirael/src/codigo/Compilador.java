@@ -180,15 +180,21 @@ public class Compilador extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btn_abrirActionPerformed
 
-    private void compilar() {
-        analizadorLexico();
-        llenarTablaTokens();
-        if(!lexer.errorFound){
-         analizadorSintactico();
-        } 
-       
+ private void compilar() {
+    txtA_salida.setText("");
+    analizadorLexico();
+    llenarTablaTokens();
+    
+    // Verificar si hay tokens antes del análisis sintáctico
+    if (tokens.isEmpty()) {
+        txtA_salida.append("Error: El archivo está vacío.\n");
+        return;
     }
-
+    
+    if(!lexer.errorFound){
+        analizadorSintactico();
+    } 
+}
     private void ReadTxtAreaArchivo() {
         try {
             lexer = new Lexico(archivoPath);

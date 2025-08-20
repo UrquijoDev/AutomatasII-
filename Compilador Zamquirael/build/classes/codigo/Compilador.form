@@ -133,9 +133,6 @@
         </Property>
         <Property name="text" type="java.lang.String" value="Tabla de Simbolos"/>
       </Properties>
-      <AccessibilityProperties>
-        <Property name="AccessibleContext.accessibleName" type="java.lang.String" value="Tabla de Simbolos"/>
-      </AccessibilityProperties>
     </Component>
     <Component class="javax.swing.JButton" name="btn_compilar">
       <Properties>
