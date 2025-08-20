@@ -43,7 +43,7 @@ public class Compilador extends javax.swing.JFrame {
     public Compilador() throws IOException {
         initComponents();
         init();
-
+    btn_compilar.setEnabled(true); // Siempre habilitado
     }
 
     private void init() throws IOException {
@@ -204,26 +204,49 @@ public class Compilador extends javax.swing.JFrame {
         }
     }
 
-    private void analizadorLexico() {
-        tokens.clear();
+   private void analizadorLexico() {
+    tokens.clear();
+    boolean isTempFile = false;
+    File tempFile = null;
 
-        try {
-            File codigo = new File(archivoPath);
-            FileOutputStream output = new FileOutputStream(codigo);
-            byte[] bytesText = paneCodigo.getText().getBytes();
-            output.write(bytesText);
-            BufferedReader entrada = new BufferedReader(new InputStreamReader(new FileInputStream(codigo), "UTF8"));
-            lexer = new Lexico(archivoPath);
-
-        } catch (FileNotFoundException ex) {
-            System.out.println("El archivo no pudo ser encontrado... " + ex.getMessage());
-        } catch (IOException ex) {
-            System.out.println("Error al escribir en el archivo... " + ex.getMessage());
+    try {
+        File codigo;
+        if (archivoPath != null) {
+            codigo = new File(archivoPath);
+        } else {
+            // Crear un archivo temporal
+            tempFile = File.createTempFile("tempCode", ".txt");
+            tempFile.deleteOnExit(); // Asegurar que se elimine al salir
+            archivoPath = tempFile.getAbsolutePath();
+            isTempFile = true;
+            // Escribir el contenido del área de texto en el archivo temporal
+            FileOutputStream output = new FileOutputStream(tempFile);
+            output.write(paneCodigo.getText().getBytes());
+            output.close();
+            codigo = tempFile;
         }
 
-        tokens = lexer.lexico(txtA_salida);
+        // Sobrescribir el archivo con el contenido actual del área de texto
+        FileOutputStream output = new FileOutputStream(codigo);
+        byte[] bytesText = paneCodigo.getText().getBytes();
+        output.write(bytesText);
+        output.close();
 
+        lexer = new Lexico(archivoPath);
+
+    } catch (IOException ex) {
+        System.out.println("Error al crear archivo temporal... " + ex.getMessage());
+        return;
     }
+
+    tokens = lexer.lexico(txtA_salida);
+
+    // Eliminar el archivo temporal si se creó
+    if (isTempFile && tempFile != null) {
+        tempFile.delete();
+        archivoPath = null; // Resetear la ruta del archivo
+    }
+}
     
     private void analizadorSintactico(){
         sintaxis = new Sintactico();

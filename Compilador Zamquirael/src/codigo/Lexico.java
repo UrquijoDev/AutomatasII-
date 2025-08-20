@@ -241,7 +241,15 @@ public class Lexico {
         }
         catch(Exception e){
             System.out.println(e.getMessage());
+        }finally {
+        try {
+            if (file != null) {
+                file.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    }
         
         if(!errorFound){
             salida.append("/////////////Analisis lexico Terminado///////////// \n");
