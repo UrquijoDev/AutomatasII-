@@ -13,6 +13,11 @@ public class Sintactico {
     int contadorCorchetes = 0;
     boolean esBoolean = false;
 
+        // Nuevas variables para tabla de símbolos
+    private NodoVar cabezaVar = null;
+    private NodoVar punteroVar = null;
+    
+    
     public void sintaxis() {
         p = cabeza;
 
@@ -365,16 +370,47 @@ public class Sintactico {
         }
     }
 
-    private void checkDeclaracionVariable() {
+    // NUEVOS MÉTODOS PARA MANEJO DE TABLA DE SÍMBOLOS
+    private boolean existeVariable(String nombre) {
+        NodoVar actual = cabezaVar;
+        while (actual != null) {
+            if (actual.nombre.equals(nombre)) {
+                return true;
+            }
+            actual = actual.sig;
+        }
+        return false;
+    }
 
+    private void insertarVariable(String nombre, int tipo) {
+        if (existeVariable(nombre)) {
+            resultado += "Error semántico: Variable '" + nombre + "' ya declarada (línea " + p.linea + ")\n";
+            errorSintactico = true;
+            return;
+        }
+        
+        NodoVar nuevaVar = new NodoVar(nombre, tipo);
+        if (cabezaVar == null) {
+            cabezaVar = nuevaVar;
+            punteroVar = cabezaVar;
+        } else {
+            punteroVar.sig = nuevaVar;
+            punteroVar = nuevaVar;
+        }
+    }
+    private void checkDeclaracionVariable() {
+        int tipoVariable = p.idToken; // Guardar el tipo de variable (207, 208, etc.)
         p = p.sig;
 
         if (p.idToken == 100) //Identificador
         {
+            // Insertar en tabla de símbolos
+            insertarVariable(p.lexema, tipoVariable);
+            
             p = p.sig;
             if (p.idToken == 120) // ,
             {
-                checkDeclaracionVariable();
+                checkDeclaracionVariable(); // Llamada Recursiva 
             } else {
 
                 if (p.idToken == 113) // =
