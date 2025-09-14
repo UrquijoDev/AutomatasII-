@@ -157,6 +157,11 @@ public class Sintactico {
 
                 } else if (p.idToken == 100) // identificador (Iniio de asignacion de variable)
                 {
+                    // Verificar si la variable está declarada en el lado izquierdo
+                    if (!existeVariable(p.lexema)) {
+                        resultado += "Error semántico: Variable '" + p.lexema + "' no declarada (línea " + p.linea + ")\n";
+                        errorSintactico = true;
+                    }
                     p = p.sig;
                     if (p.idToken == 113) // =
                     {
@@ -196,7 +201,13 @@ public class Sintactico {
 
                         if (p.idToken == 100 || p.idToken == 126 || p.idToken == 127) //Id,Cadena o Char
                         {
-
+                                // VERIFICAR SI ES UN IDENTIFICADOR Y SI ESTÁ DECLARADO
+                            if (p.idToken == 100) { 
+                                if (!existeVariable(p.lexema)) {
+                                    resultado += "Error semántico: Variable '" + p.lexema + "' no declarada (línea " + p.linea + ")\n";
+                                    errorSintactico = true;
+                                }
+                            }
                             p = p.sig;
                             if (p.idToken == 118) // )
                             {
@@ -371,6 +382,18 @@ public class Sintactico {
     }
 
     // NUEVOS MÉTODOS PARA MANEJO DE TABLA DE SÍMBOLOS
+   // Método para verificar si una variable está declarada
+    private boolean variableDeclarada(String nombre) {
+        NodoVar actual = cabezaVar;
+        while (actual != null) {
+            if (actual.nombre.equals(nombre)) {
+                return true;
+            }
+            actual = actual.sig;
+        }
+        return false;
+    } 
+    
     private boolean existeVariable(String nombre) {
         NodoVar actual = cabezaVar;
         while (actual != null) {
@@ -398,6 +421,7 @@ public class Sintactico {
             punteroVar = nuevaVar;
         }
     }
+    
     private void checkDeclaracionVariable() {
         int tipoVariable = p.idToken; // Guardar el tipo de variable (207, 208, etc.)
         p = p.sig;
@@ -486,6 +510,11 @@ public class Sintactico {
     private boolean checkFactor() {
         boolean FactorEncontrado = false;
         if (p.idToken == 100) {// id
+            // VERIFICAR SI LA VARIABLE ESTÁ DECLARADA
+            if (!variableDeclarada(p.lexema)) {
+                resultado += "Error semántico: Variable '" + p.lexema + "' no declarada (línea " + p.linea + ")\n";
+                errorSintactico = true;
+            }
             FactorEncontrado = true;
         } else if (p.idToken == 126) {// cadena
             FactorEncontrado = true;
@@ -610,7 +639,6 @@ public class Sintactico {
         boolean expresionCondicional = false;
 
         if (checkExpreSimple()) {
-
             if (esBoolean) {
                 expresionCondicional = true;
                 esBoolean = false;

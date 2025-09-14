@@ -12,11 +12,8 @@ hj = x;
 x = 4 + 5 ;
 
 a = 2 + 4 * d ;
-break;
 
-b = 200 3 3 % 5 + 3;
-
-c= switch + for + case + null;
+b = 200;
 
  if (a != b && a>b || c>b && c!= b)  {
 
