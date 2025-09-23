@@ -1,5 +1,8 @@
 package codigo;
 
+import java.util.ArrayList;
+import java.util.Stack;
+
 /**
  *
  * @author Rocapez
@@ -17,6 +20,16 @@ public class Sintactico {
     private NodoVar cabezaVar = null;
     private NodoVar punteroVar = null;
     
+        // Nueva pila para la notación polish
+    private Stack<ElementoExpresion> pilaPolish = new Stack<>();
+    private ArrayList<ElementoExpresion> expresionPolish = new ArrayList<>();
+    
+    
+    // Método para agregar elementos a la expresión polish
+    private void agregarElementoPolish(int tipoElemento, int tipoDato, String valor) {
+        ElementoExpresion elem = new ElementoExpresion(tipoElemento, tipoDato, valor, p.linea);
+        expresionPolish.add(elem);
+    }
     
     public void sintaxis() {
         p = cabeza;
