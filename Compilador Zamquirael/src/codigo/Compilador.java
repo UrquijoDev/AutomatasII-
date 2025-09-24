@@ -76,7 +76,7 @@ public class Compilador extends javax.swing.JFrame {
         paneCodigo.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         jScrollPane1.setViewportView(paneCodigo);
 
-        tableTokens.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        tableTokens.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         tableTokens.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 

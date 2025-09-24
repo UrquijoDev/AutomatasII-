@@ -24,4 +24,27 @@ public class ElementoExpresion {
         this.valor = valor;
         this.linea = linea;
     }
+    
+    public boolean esOperador() {
+        return tipoElemento == TIPO_OPERADOR;
+    }
+    
+    public boolean esOperando() {
+        return tipoElemento == TIPO_OPERANDO;
+    }
+    
+    public boolean esVariable() {
+        return tipoElemento == TIPO_VARIABLE;
+    }
+    
+    @Override
+    public String toString() {
+        String tipoStr = "";
+        switch(tipoElemento) {
+            case TIPO_OPERADOR: tipoStr = "OPERADOR"; break;
+            case TIPO_OPERANDO: tipoStr = "OPERANDO"; break;
+            case TIPO_VARIABLE: tipoStr = "VARIABLE"; break;
+        }
+        return tipoStr + "[" + valor + ", tipo:" + tipoDato + ", linea:" + linea + "]";
+    }
 }

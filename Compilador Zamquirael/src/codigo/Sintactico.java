@@ -19,21 +19,21 @@ public class Sintactico {
         // Nuevas variables para tabla de símbolos
     private NodoVar cabezaVar = null;
     private NodoVar punteroVar = null;
+   
+      // NUEVAS VARIABLES PARA NOTACIÓN POLISH
+    private NotacionPolish notacionPolish;
+    private boolean enExpresion;
+    private int tipoVariableActual; // Para asignaciones
+    private boolean debugPolish = true; // Para mostrar depuración
     
-        // Nueva pila para la notación polish
-    private Stack<ElementoExpresion> pilaPolish = new Stack<>();
-    private ArrayList<ElementoExpresion> expresionPolish = new ArrayList<>();
-    
-    
-    // Método para agregar elementos a la expresión polish
-    private void agregarElementoPolish(int tipoElemento, int tipoDato, String valor) {
-        ElementoExpresion elem = new ElementoExpresion(tipoElemento, tipoDato, valor, p.linea);
-        expresionPolish.add(elem);
-    }
     
     public void sintaxis() {
         p = cabeza;
-
+    
+// INICIALIZAR NOTACIÓN POLISH
+    notacionPolish = new NotacionPolish();
+    enExpresion = false;
+    tipoVariableActual = 0;
           // Verificar si la lista de tokens está vacía
     if (p == null) {
         resultado = "Error: No hay tokens para analizar (archivo vacío).\n";
@@ -436,65 +436,51 @@ public class Sintactico {
     }
     
     private void checkDeclaracionVariable() {
-        int tipoVariable = p.idToken; // Guardar el tipo de variable (207, 208, etc.)
+    tipoVariableActual = p.idToken; // Guardar tipo de variable (207, 208, etc.)
+    p = p.sig;
+
+    if (p.idToken == 100) { // Identificador
+        insertarVariable(p.lexema, tipoVariableActual);
         p = p.sig;
-
-        if (p.idToken == 100) //Identificador
-        {
-            // Insertar en tabla de símbolos
-            insertarVariable(p.lexema, tipoVariable);
-            
-            p = p.sig;
-            if (p.idToken == 120) // ,
-            {
-                checkDeclaracionVariable(); // Llamada Recursiva 
-            } else {
-
-                if (p.idToken == 113) // =
-                {
-                    p = p.sig;
-                    if (checkExpreSimple()) {
-                        if (checkOperacionRelac()) {
-                            resultado += "Operador Invalido en  " + p.linea + "\n";
-                            errorSintactico = true;
-                        }
-                        if (p.idToken == 121) // ; 
-                        {
-                            if (p.sig == null) {
-
-                            } else {
-                                p = p.sig;
-                            }
-                        } else {
-                            resultado += "Se espera ; en " + p.linea + "\n";
-                            errorSintactico = true;
-                        }
-                    } else {
-                        resultado += "Se espera expresión simple en " + p.linea + "\n";
+        
+        if (p.idToken == 120) { // ,
+            checkDeclaracionVariable(); // Llamada recursiva
+        } else {
+            if (p.idToken == 113) { // =
+                p = p.sig;
+                
+                // INICIAR NOTACIÓN POLISH PARA EXPRESIÓN
+                enExpresion = true;
+                notacionPolish.limpiar();
+                
+                if (checkExpreSimple()) {
+                    // FINALIZAR EXPRESIÓN Y VALIDAR
+                    enExpresion = false;
+                    notacionPolish.finalizarExpresion();
+                    
+                    // VALIDAR ASIGNACIÓN
+                    if (!notacionPolish.validarAsignacion(tipoVariableActual, p.linea)) {
+                        resultado += notacionPolish.getResultadoValidacion();
                         errorSintactico = true;
                     }
-                } else {
-                    if (p.idToken == 121) // ;
-                    {
+                    
+                    // MOSTRAR NOTACIÓN POLISH (debug)
+                    mostrarNotacionPolish();
+                    
+                    if (p.idToken == 121) { // ;
                         p = p.sig;
                     } else {
-                        resultado += "Se espera ; en renglon " + p.linea + "\n";
+                        resultado += "Se espera ; en " + p.linea + "\n";
                         errorSintactico = true;
                     }
                 }
-
+            } else if (p.idToken == 121) { // ;
+                p = p.sig;
             }
-        } else {
-            resultado += "Se espera un identificador en linea " + p.linea + "\n";
-            errorSintactico = true;
         }
-
-        if (esBoolean) {
-            esBoolean = false;
-        }
-
     }
-
+}
+    
     private boolean checkOperacionAditiva() {
 
         if (p.idToken == 103 || p.idToken == 104) {
@@ -521,87 +507,82 @@ public class Sintactico {
     }
 
     private boolean checkFactor() {
-        boolean FactorEncontrado = false;
-        if (p.idToken == 100) {// id
-            // VERIFICAR SI LA VARIABLE ESTÁ DECLARADA
-            if (!variableDeclarada(p.lexema)) {
-                resultado += "Error semántico: Variable '" + p.lexema + "' no declarada (línea " + p.linea + ")\n";
-                errorSintactico = true;
+    boolean FactorEncontrado = false;
+    
+    if (p.idToken == 100) { // id
+        if (!variableDeclarada(p.lexema)) {
+            resultado += "Error semántico: Variable '" + p.lexema + "' no declarada (línea " + p.linea + ")\n";
+            errorSintactico = true;
+        } else {
+            // AGREGAR A NOTACIÓN POLISH
+            int tipoVar = obtenerTipoVariable(p.lexema);
+            if (enExpresion) {
+                notacionPolish.agregarVariable(p.lexema, tipoVar, p.linea);
             }
-            FactorEncontrado = true;
-        } else if (p.idToken == 126) {// cadena
-            FactorEncontrado = true;
-        } else if (p.idToken == 101) {// int
-            FactorEncontrado = true;
-        } else if (p.idToken == 102) {// decimal
-            FactorEncontrado = true;
         }
-
-        /*else if (p.idToken == 117) {// (
-            p = p.sig;
-            if (checkExpreSimple()) {
-
-                if (p.idToken == 118) {// )
-                    FactorEncontrado = true;
-
-                } else {
-
-                    resultado += "Se espera ) en " + p.linea + "\n";
-
-                    errorSintactico = true;
-                }
-            } else {
-
-                resultado += "Se espera expresion simple en " + p.linea + "\n";
-
-                errorSintactico = true;
-
-            }
-
-        }*/
-        return FactorEncontrado;
-    }
-
-    private boolean checkExpreSimple() {
-        boolean expresionSimpleEncontrada = false;
-        if (checkSignos()) {// + - 
-
-            if (checkTermino()) {
-                expresionSimpleEncontrada = true;
-            } else {
-
-                resultado += "Se espera termino en " + p.linea + "\n";
-
-                errorSintactico = true;
-            }
-
-        } else if (checkTermino()) {
-            expresionSimpleEncontrada = true;
-            if (checkOperacionAditiva() || checkOperacionMult()) {
-                p = p.sig;
-                expresionSimpleEncontrada = false;
-
-                if (checkExpreSimple()) {
-                    expresionSimpleEncontrada = true;
-                } else {
-
-                    if (!errorSintactico) {
-                        resultado += "se espera una expresion simple en " + p.linea + "\n";
-
-                        errorSintactico = true;
-                    }
-
-                }
-            } else {
-
-            }
-        } else if (checkBoolean()) {
-            expresionSimpleEncontrada = true;
-            p = p.sig;
-            esBoolean = true;
+        FactorEncontrado = true;
+        
+    } else if (p.idToken == 126) { // cadena
+        // AGREGAR A NOTACIÓN POLISH
+        if (enExpresion) {
+            notacionPolish.agregarOperando(210, p.lexema, p.linea); // 210 = string
         }
-        return expresionSimpleEncontrada;
+        FactorEncontrado = true;
+        
+    } else if (p.idToken == 101) { // int
+        // AGREGAR A NOTACIÓN POLISH
+        if (enExpresion) {
+            notacionPolish.agregarOperando(207, p.lexema, p.linea); // 207 = int
+        }
+        FactorEncontrado = true;
+        
+    } else if (p.idToken == 102) { // decimal
+        // AGREGAR A NOTACIÓN POLISH
+        if (enExpresion) {
+            notacionPolish.agregarOperando(208, p.lexema, p.linea); // 208 = float
+        }
+        FactorEncontrado = true;
+        
+    } else if (p.idToken == 211 || p.idToken == 212) { // true o false
+        // AGREGAR A NOTACIÓN POLISH
+        if (enExpresion) {
+            notacionPolish.agregarOperando(209, p.lexema, p.linea); // 209 = boolean
+        }
+        FactorEncontrado = true;
     }
+    
+    return FactorEncontrado;
+}
+
+private boolean checkExpreSimple() {
+    boolean expresionSimpleEncontrada = false;
+    
+    if (checkTermino()) {
+        expresionSimpleEncontrada = true;
+        
+        // Procesar operaciones aditivas
+        while (p != null && checkOperacionAditiva()) {
+            String operador = obtenerOperador(p.idToken);
+            // AGREGAR OPERADOR A NOTACIÓN POLISH
+            if (enExpresion) {
+                notacionPolish.agregarOperador(operador, p.linea);
+            }
+            p = p.sig;
+            
+            if (!checkTermino()) {
+                resultado += "Se espera término en " + p.linea + "\n";
+                errorSintactico = true;
+                return false;
+            }
+        }
+    } else if (checkBoolean()) {
+        expresionSimpleEncontrada = true;
+        p = p.sig;
+        esBoolean = true;
+    }
+    
+    return expresionSimpleEncontrada;
+}
 
     private boolean checkSignos() {
         if (p.idToken == 103 || p.idToken == 104) {
@@ -621,85 +602,115 @@ public class Sintactico {
     }
 
     private boolean checkTermino() {
-
-        boolean TerminoEncontrado = false;
+    boolean TerminoEncontrado = false;
+    
+    // Procesar primer factor
+    if (checkFactor()) {
+        TerminoEncontrado = true;
+        p = p.sig;
+    }
+    
+    // Procesar operaciones multiplicativas
+    if (p != null && checkOperacionMult()) {
+        String operador = obtenerOperador(p.idToken);
+        // AGREGAR OPERADOR A NOTACIÓN POLISH
+        if (enExpresion) {
+            notacionPolish.agregarOperador(operador, p.linea);
+        }
+        p = p.sig;
+        
         if (checkFactor()) {
             TerminoEncontrado = true;
             p = p.sig;
-        }
-        if (p.idToken != 121 && TerminoEncontrado) {
-            if (checkOperacionMult()) {
-                p = p.sig;
-                if (checkFactor()) {
-                    TerminoEncontrado = true;
-                    p = p.sig;
-                } else {
-
-                    resultado += "Se espera  factor en " + p.linea + "\n";
-
-                    errorSintactico = true;
-                }
-            } else {
-
-                TerminoEncontrado = true;
-            }
-        }
-
-        return TerminoEncontrado;
-    }
-
-    private boolean checkExpreCond() {
-        boolean expresionCondicional = false;
-
-        if (checkExpreSimple()) {
-            if (esBoolean) {
-                expresionCondicional = true;
-                esBoolean = false;
-            } else {
-
-                if (checkOperacionRelac()) {
-                    p = p.sig;
-                    if (checkExpreSimple()) {
-                        expresionCondicional = true;
-
-                        if (esBoolean) {
-                            esBoolean = false;
-                        }
-
-                        if (p.idToken != 118 && expresionCondicional) {
-
-                            if (checkOperacionRelac()) {
-                                p = p.sig;
-                                checkExpreCond();
-                            } else {
-
-                                if (checkExpreSimple()) {
-                                    errorSintactico = true;
-                                    resultado += "se espera operador relacional en " + p.linea + "\n";
-                                }
-
-                            }
-
-                        }
-
-                    } else {
-                        errorSintactico = true;
-                        resultado += "se espera expresion Simple en " + p.linea + "\n";
-
-                    }
-                } else {
-                    errorSintactico = true;
-                    resultado += "se espera operador relacional en " + p.linea + "\n";
-                }
-
-            }
-
         } else {
+            resultado += "Se espera factor en " + p.linea + "\n";
             errorSintactico = true;
-            resultado += "se espera expresion Simple en " + p.linea + "\n";
-
         }
-
-        return expresionCondicional;
     }
+    
+    return TerminoEncontrado;
+}
+
+   private boolean checkExpreCond() {
+    boolean expresionCondicional = false;
+    
+    // INICIAR NOTACIÓN POLISH PARA CONDICIÓN
+    enExpresion = true;
+    notacionPolish.limpiar();
+
+    if (checkExpreSimple()) {
+        if (esBoolean) {
+            expresionCondicional = true;
+            esBoolean = false;
+        } else {
+            if (checkOperacionRelac()) {
+                String operador = obtenerOperador(p.idToken);
+                if (enExpresion) {
+                    notacionPolish.agregarOperador(operador, p.linea);
+                }
+                p = p.sig;
+                
+                if (checkExpreSimple()) {
+                    expresionCondicional = true;
+                }
+            }
+        }
+        
+        // FINALIZAR Y VALIDAR CONDICIÓN
+        enExpresion = false;
+        notacionPolish.finalizarExpresion();
+        
+        // VALIDAR QUE SEA BOOLEAN
+        if (!notacionPolish.validarCondicional(p.linea)) {
+            resultado += notacionPolish.getResultadoValidacion();
+            errorSintactico = true;
+        }
+        
+        mostrarNotacionPolish();
+    }
+    
+    return expresionCondicional;
+}
+    
+    // MÉTODOS AUXILIARES PARA NOTACIÓN POLISH
+private String obtenerOperador(int token) {
+    switch(token) {
+        case 103: return "+";
+        case 104: return "-";
+        case 105: return "*";
+        case 106: return "/";
+        case 107: return "%";
+        case 108: return "<";
+        case 109: return "<=";
+        case 110: return ">";
+        case 111: return ">=";
+        case 112: return "==";
+        case 116: return "!=";
+        case 114: return "||";
+        case 115: return "&&";
+        default: return "?";
+    }
+}
+
+private int obtenerTipoVariable(String nombre) {
+    NodoVar actual = cabezaVar;
+    while (actual != null) {
+        if (actual.nombre.equals(nombre)) {
+            return actual.tipo;
+        }
+        actual = actual.sig;
+    }
+    return 0; // indefinido
+}
+
+private void mostrarNotacionPolish() {
+    if (debugPolish && !notacionPolish.getExpresionPolish().isEmpty()) {
+        resultado += "Notación Polish: ";
+        for (ElementoExpresion elem : notacionPolish.getExpresionPolish()) {
+            resultado += elem.valor + " ";
+        }
+        resultado += "\n";
+    }
+}
+    
 }
