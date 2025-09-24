@@ -24,8 +24,7 @@ public class Sintactico {
     private NotacionPolish notacionPolish;
     private boolean enExpresion;
     private int tipoVariableActual; // Para asignaciones
-    private boolean debugPolish = true; // Para mostrar depuración
-    
+private boolean debugPolish = false; // Cambiar a false para no mostrar debug    
     
     public void sintaxis() {
         p = cabeza;
@@ -222,7 +221,7 @@ public class Sintactico {
                                 }
                             }
                             p = p.sig;
-                            if (p.idToken == 118) // )
+                            if (p != null && p.idToken == 118) // ) )
                             {
                                 p = p.sig;
                                 if (p.idToken == 121) // ;
@@ -233,7 +232,7 @@ public class Sintactico {
                                     errorSintactico = true;
                                 }
                             } else {
-                                resultado += "Se espera ) en la linea " + p.linea + "\n";
+                               resultado += "Se espera ) en " + (p != null ? p.linea : "desconocida") + "\n";
                                 errorSintactico = true;
                             }
                         } else {
@@ -260,7 +259,7 @@ public class Sintactico {
                                 break;
                             }
 
-                            if (p.idToken == 118)// ) 
+                             if (p != null && p.idToken == 118) // ) 
                             {
 
                                 p = p.sig;
@@ -314,7 +313,7 @@ public class Sintactico {
                                     errorSintactico = true;
                                 }
                             } else {
-                                resultado += "Se espera ) en " + p.linea + "\n";
+                                resultado += "Se espera ) en " + (p != null ? p.linea : "desconocida") + "\n";
                                 errorSintactico = true;
                             }
                         } else {
@@ -435,7 +434,7 @@ public class Sintactico {
         }
     }
     
-    private void checkDeclaracionVariable() {
+private void checkDeclaracionVariable() {
     tipoVariableActual = p.idToken; // Guardar tipo de variable (207, 208, etc.)
     p = p.sig;
 
@@ -458,14 +457,16 @@ public class Sintactico {
                     enExpresion = false;
                     notacionPolish.finalizarExpresion();
                     
-                    // VALIDAR ASIGNACIÓN
-                    if (!notacionPolish.validarAsignacion(tipoVariableActual, p.linea)) {
+                    // VALIDAR ASIGNACIÓN (solo si no hay errores previos)
+                    if (!errorSintactico && !notacionPolish.validarAsignacion(tipoVariableActual, p.linea)) {
                         resultado += notacionPolish.getResultadoValidacion();
                         errorSintactico = true;
                     }
                     
-                    // MOSTRAR NOTACIÓN POLISH (debug)
-                    mostrarNotacionPolish();
+                    // MOSTRAR NOTACIÓN POLISH SOLO SI HAY ERROR
+                    if (errorSintactico) {
+                        mostrarNotacionPolish();
+                    }
                     
                     if (p.idToken == 121) { // ;
                         p = p.sig;
@@ -476,8 +477,14 @@ public class Sintactico {
                 }
             } else if (p.idToken == 121) { // ;
                 p = p.sig;
+            } else {
+                resultado += "Se espera = o ; en " + p.linea + "\n";
+                errorSintactico = true;
             }
         }
+    } else {
+        resultado += "Se espera un identificador en línea " + p.linea + "\n";
+        errorSintactico = true;
     }
 }
     
@@ -563,7 +570,6 @@ private boolean checkExpreSimple() {
         // Procesar operaciones aditivas
         while (p != null && checkOperacionAditiva()) {
             String operador = obtenerOperador(p.idToken);
-            // AGREGAR OPERADOR A NOTACIÓN POLISH
             if (enExpresion) {
                 notacionPolish.agregarOperador(operador, p.linea);
             }
@@ -579,6 +585,12 @@ private boolean checkExpreSimple() {
         expresionSimpleEncontrada = true;
         p = p.sig;
         esBoolean = true;
+    } else {
+        // Si no es término ni booleano, podría ser un error
+        if (p != null && p.idToken != 118 && p.idToken != 121) { // No es ) o ;
+            resultado += "Se espera expresión simple en " + p.linea + "\n";
+            errorSintactico = true;
+        }
     }
     
     return expresionSimpleEncontrada;
@@ -631,7 +643,7 @@ private boolean checkExpreSimple() {
     return TerminoEncontrado;
 }
 
-   private boolean checkExpreCond() {
+private boolean checkExpreCond() {
     boolean expresionCondicional = false;
     
     // INICIAR NOTACIÓN POLISH PARA CONDICIÓN
@@ -639,10 +651,10 @@ private boolean checkExpreSimple() {
     notacionPolish.limpiar();
 
     if (checkExpreSimple()) {
-        if (esBoolean) {
-            expresionCondicional = true;
-            esBoolean = false;
-        } else {
+        expresionCondicional = true;
+        
+        // PROCESAR OPERADORES RELACIONALES Y LÓGICOS
+        while (p != null && (checkOperacionRelac() || checkOperacionLogica())) {
             if (checkOperacionRelac()) {
                 String operador = obtenerOperador(p.idToken);
                 if (enExpresion) {
@@ -651,7 +663,25 @@ private boolean checkExpreSimple() {
                 p = p.sig;
                 
                 if (checkExpreSimple()) {
-                    expresionCondicional = true;
+                    // Continuar procesando
+                } else {
+                    errorSintactico = true;
+                    resultado += "Se espera expresión simple después del operador relacional en línea " + p.linea + "\n";
+                    break;
+                }
+            } else if (checkOperacionLogica()) {
+                String operador = obtenerOperador(p.idToken);
+                if (enExpresion) {
+                    notacionPolish.agregarOperador(operador, p.linea);
+                }
+                p = p.sig;
+                
+                if (checkExpreSimple()) {
+                    // Continuar procesando
+                } else {
+                    errorSintactico = true;
+                    resultado += "Se espera expresión simple después del operador lógico en línea " + p.linea + "\n";
+                    break;
                 }
             }
         }
@@ -660,16 +690,27 @@ private boolean checkExpreSimple() {
         enExpresion = false;
         notacionPolish.finalizarExpresion();
         
-        // VALIDAR QUE SEA BOOLEAN
-        if (!notacionPolish.validarCondicional(p.linea)) {
+        // VALIDAR QUE SEA BOOLEAN (solo si no hay errores previos)
+        if (!errorSintactico && !notacionPolish.validarCondicional(p.linea)) {
             resultado += notacionPolish.getResultadoValidacion();
             errorSintactico = true;
         }
         
-        mostrarNotacionPolish();
+        // MOSTRAR NOTACIÓN POLISH SOLO SI HAY ERROR O EN DEBUG
+        if (errorSintactico) {
+            mostrarNotacionPolish();
+        }
+    } else {
+        errorSintactico = true;
+        resultado += "Se espera expresión condicional en línea " + p.linea + "\n";
     }
     
     return expresionCondicional;
+}
+
+// AGREGAR ESTE MÉTODO NUEVO PARA DETECTAR OPERADORES LÓGICOS
+private boolean checkOperacionLogica() {
+    return p.idToken == 114 || p.idToken == 115; // || o &&
 }
     
     // MÉTODOS AUXILIARES PARA NOTACIÓN POLISH
@@ -704,12 +745,20 @@ private int obtenerTipoVariable(String nombre) {
 }
 
 private void mostrarNotacionPolish() {
-    if (debugPolish && !notacionPolish.getExpresionPolish().isEmpty()) {
-        resultado += "Notación Polish: ";
-        for (ElementoExpresion elem : notacionPolish.getExpresionPolish()) {
-            resultado += elem.valor + " ";
+    // SOLO MOSTRAR SI HAY ERRORES O SI EL DEBUG ESTÁ ACTIVADO
+    if (errorSintactico || debugPolish) {
+        if (!notacionPolish.getExpresionPolish().isEmpty()) {
+            resultado += "Notación Polish: ";
+            for (ElementoExpresion elem : notacionPolish.getExpresionPolish()) {
+                resultado += elem.valor + " ";
+            }
+            resultado += "\n";
+            
+            // Si hay errores de validación, mostrarlos también
+            if (!notacionPolish.getResultadoValidacion().isEmpty()) {
+                resultado += notacionPolish.getResultadoValidacion();
+            }
         }
-        resultado += "\n";
     }
 }
     
