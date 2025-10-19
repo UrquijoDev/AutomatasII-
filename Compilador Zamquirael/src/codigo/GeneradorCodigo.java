@@ -74,16 +74,15 @@ public class GeneradorCodigo {
     }
     
     public void generarAsignacion(String variable, String expresionRPN) {
-        generar(expresionRPN);
-        generar("= " + variable);
+     generar(expresionRPN + " " + variable + " =");
     }
     
     public void generarPrint(String valor) {
-        generar("PRT " + valor);
+     generar(valor + " PRT");
     }
     
     public void generarScanner(String variable) {
-        generar("SCN " + variable);
+        generar(variable + " SCN");
     }
     
     public ArrayList<String> getCodigoIntermedio() {
