@@ -74,7 +74,7 @@ public class GeneradorCodigo {
     }
     
     public void generarAsignacion(String variable, String expresionRPN) {
-     generar(expresionRPN + " " + variable + " =");
+    generar(variable + " " + expresionRPN + " =");
     }
     
     public void generarPrint(String valor) {
