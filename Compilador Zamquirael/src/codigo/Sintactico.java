@@ -97,7 +97,7 @@ private boolean debugPolish = false; // Cambiar a false para no mostrar debug
                                     if (p.idToken == 200 || p.idToken == 206 || p.idToken == 100 || 
                                             p.idToken == 203 || p.idToken == 207 || 
                                             p.idToken == 208 || p.idToken == 209 || p.idToken == 210 || 
-                                            p.idToken == 204 || p.idToken == 205) {
+                                            p.idToken == 204 || p.idToken == 205 || p.idToken == 218) {
                                         statements();
                                     } else if (p.idToken == 124) // }
                                     {
@@ -245,6 +245,42 @@ private boolean debugPolish = false; // Cambiar a false para no mostrar debug
                         errorSintactico = true;
                     }
                 } // fin de print
+                else if (p.idToken == 218) // scanner
+                {
+                    // Consumiendo 'scanner'
+                    p = p.sig;
+                    if (p == null) {
+                        resultado += "Se espera un identificador despues de scanner en linea desconocida\n";
+                        errorSintactico = true;
+                        break;
+                    }
+
+                    if (p.idToken == 100) { // Identificador
+                        String nombreVar = p.lexema;
+                        // Validar que la variable exista
+                        if (!existeVariable(nombreVar)) {
+                            resultado += "Error semántico: Variable '" + nombreVar + "' no declarada (línea " + p.linea + ")\n";
+                            errorSintactico = true;
+                        } else {
+                            int tipo = obtenerTipoVariable(nombreVar);
+                            // Aceptar solo int(207), float(208) o string(210)
+                            if (tipo != 207 && tipo != 208 && tipo != 210) {
+                                resultado += "Error semántico: Variable '" + nombreVar + "' de tipo incompatible para scanner (línea " + p.linea + ")\n";
+                                errorSintactico = true;
+                            }
+                        }
+                        p = p.sig;
+                        if (p != null && p.idToken == 121) { // ;
+                            p = p.sig;
+                        } else {
+                            resultado += "Se espera ; en la linea " + (p != null ? p.linea : "desconocida") + "\n";
+                            errorSintactico = true;
+                        }
+                    } else {
+                        resultado += "Se espera un identificador despues de scanner en linea " + p.linea + "\n";
+                        errorSintactico = true;
+                    }
+                } // fin de scanner
                 else if (p.idToken == 200) //Inicio de if 
                 {
                     p = p.sig;

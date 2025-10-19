@@ -69,7 +69,8 @@ public class Lexico {
         {"211","true"},
         {"212","false"},
         {"216", "package"},
-        {"217", "class"}
+        {"217", "class"},
+        {"218", "scanner"}
     };
 
     //Tabla de Errores
