@@ -10,29 +10,36 @@ import java.util.Stack;
 //Checar parentesis abierto y cadena incompleta primera comilla
 public class Sintactico {
 
-    Token cabeza = null, p;
-    boolean errorSintactico = false;
-    String resultado = "\n";
-    int contadorCorchetes = 0;
-    boolean esBoolean = false;
+        Token cabeza = null, p;
+        boolean errorSintactico = false;
+        String resultado = "\n";
+        int contadorCorchetes = 0;
+        boolean esBoolean = false;
 
         // Nuevas variables para tabla de símbolos
-    private NodoVar cabezaVar = null;
-    private NodoVar punteroVar = null;
-   
-      // NUEVAS VARIABLES PARA NOTACIÓN POLISH
-    private NotacionPolish notacionPolish;
-    private boolean enExpresion;
-    private int tipoVariableActual; // Para asignaciones
-private boolean debugPolish = false; // Cambiar a false para no mostrar debug    
+        private NodoVar cabezaVar = null;
+        private NodoVar punteroVar = null;
+
+        // NUEVAS VARIABLES PARA NOTACIÓN POLISH
+        private NotacionPolish notacionPolish;
+        private boolean enExpresion;
+        private int tipoVariableActual; // Para asignaciones
+        private boolean debugPolish = false; // Cambiar a false para no mostrar debug
+
+        // INTEGRACIÓN DE GENERADOR DE CÓDIGO INTERMEDIO
+        private GeneradorCodigo generadorCodigo;
+        private boolean generarCodigoIntermedio;
     
     public void sintaxis() {
         p = cabeza;
     
-// INICIALIZAR NOTACIÓN POLISH
+    // INICIALIZAR NOTACIÓN POLISH
     notacionPolish = new NotacionPolish();
     enExpresion = false;
     tipoVariableActual = 0;
+    // INICIALIZAR GENERADOR DE CÓDIGO INTERMEDIO
+    generadorCodigo = new GeneradorCodigo();
+    generarCodigoIntermedio = true; // Cambia a false si no quieres generar código
           // Verificar si la lista de tokens está vacía
     if (p == null) {
         resultado = "Error: No hay tokens para analizar (archivo vacío).\n";
@@ -174,18 +181,22 @@ private boolean debugPolish = false; // Cambiar a false para no mostrar debug
                         resultado += "Error semántico: Variable '" + p.lexema + "' no declarada (línea " + p.linea + ")\n";
                         errorSintactico = true;
                     }
+                    String nombreVariable = p.lexema;
                     p = p.sig;
                     if (p.idToken == 113) // =
                     {
                         int renglon = p.linea;
                         p = p.sig;
+                        enExpresion = true;
+                        notacionPolish.limpiar();
                         if (checkExpreSimple()) {
-                            if (checkOperacionRelac()) {
-                                resultado += "Operador Invalido en  " + p.linea + "\n";
-                                errorSintactico = true;
-                                break;
+                            enExpresion = false;
+                            notacionPolish.finalizarExpresion();
+                            // GENERAR CÓDIGO DE ASIGNACIÓN
+                            if (generarCodigoIntermedio && !errorSintactico) {
+                                String expresionRPN = obtenerExpresionRPN();
+                                generadorCodigo.generarAsignacion(nombreVariable, expresionRPN);
                             }
-
                             if (p.idToken == 121) // ; 
                             {
                                 if (p.sig == null) {
@@ -213,12 +224,16 @@ private boolean debugPolish = false; // Cambiar a false para no mostrar debug
 
                         if (p.idToken == 100 || p.idToken == 126 || p.idToken == 127) //Id,Cadena o Char
                         {
-                                // VERIFICAR SI ES UN IDENTIFICADOR Y SI ESTÁ DECLARADO
+                            // VERIFICAR SI ES UN IDENTIFICADOR Y SI ESTÁ DECLARADO
                             if (p.idToken == 100) { 
                                 if (!existeVariable(p.lexema)) {
                                     resultado += "Error semántico: Variable '" + p.lexema + "' no declarada (línea " + p.linea + ")\n";
                                     errorSintactico = true;
                                 }
+                            }
+                            String valorPrint = p.lexema;
+                            if (generarCodigoIntermedio && !errorSintactico) {
+                                generadorCodigo.generarPrint(valorPrint);
                             }
                             p = p.sig;
                             if (p != null && p.idToken == 118) // ) )
@@ -247,160 +262,14 @@ private boolean debugPolish = false; // Cambiar a false para no mostrar debug
                 } // fin de print
                 else if (p.idToken == 218) // scanner
                 {
-                    // Consumiendo 'scanner'
-                    p = p.sig;
-                    if (p == null) {
-                        resultado += "Se espera un identificador despues de scanner en linea desconocida\n";
-                        errorSintactico = true;
-                        break;
-                    }
-
-                    if (p.idToken == 100) { // Identificador
-                        String nombreVar = p.lexema;
-                        // Validar que la variable exista
-                        if (!existeVariable(nombreVar)) {
-                            resultado += "Error semántico: Variable '" + nombreVar + "' no declarada (línea " + p.linea + ")\n";
-                            errorSintactico = true;
-                        } else {
-                            int tipo = obtenerTipoVariable(nombreVar);
-                            // Aceptar solo int(207), float(208) o string(210)
-                            if (tipo != 207 && tipo != 208 && tipo != 210) {
-                                resultado += "Error semántico: Variable '" + nombreVar + "' de tipo incompatible para scanner (línea " + p.linea + ")\n";
-                                errorSintactico = true;
-                            }
-                        }
-                        p = p.sig;
-                        if (p != null && p.idToken == 121) { // ;
-                            p = p.sig;
-                        } else {
-                            resultado += "Se espera ; en la linea " + (p != null ? p.linea : "desconocida") + "\n";
-                            errorSintactico = true;
-                        }
-                    } else {
-                        resultado += "Se espera un identificador despues de scanner en linea " + p.linea + "\n";
-                        errorSintactico = true;
-                    }
+                    procesarScannerConCodigo();
                 } // fin de scanner
                 else if (p.idToken == 200) //Inicio de if 
                 {
-                    p = p.sig;
-
-                    if (p.idToken == 117) // (
-                    {
-                        p = p.sig;
-                        if (checkExpreCond()) {
-
-                            if (errorSintactico) {
-
-                                break;
-                            }
-
-                             if (p != null && p.idToken == 118) // ) 
-                            {
-
-                                p = p.sig;
-
-                                if (p.idToken == 123) // {
-                                {
-                                    contadorCorchetes++;
-                                    p = p.sig;
-                                    statements();
-
-                                    if (!errorSintactico) {
-
-                                        if (p.idToken == 124) // }
-                                        {
-                                            contadorCorchetes--;
-                                            p = p.sig;
-
-                                            if (p.idToken == 201) //else 
-                                            {
-                                                p = p.sig;
-                                                if (p.idToken == 123) // {
-                                                {
-                                                    contadorCorchetes++;
-                                                    p = p.sig;
-                                                    statements();
-
-                                                    if (!errorSintactico) {
-
-                                                        if (p.idToken == 124) // }
-                                                        {
-                                                            contadorCorchetes--;
-                                                            p = p.sig;
-                                                        } else {
-                                                            resultado += "Se espera } en " + p.linea + "\n";
-                                                            errorSintactico = true;
-                                                        }
-                                                    }
-                                                } else {
-                                                    resultado += "Se espera { en " + p.linea + "\n";
-                                                    errorSintactico = true;
-                                                }
-                                            }
-
-                                        } else {
-                                            resultado += "Se espera } en " + p.linea + "\n";
-                                            errorSintactico = true;
-                                        }
-                                    }
-                                } else {
-                                    resultado += "Se espera { en " + p.linea + "\n";
-                                    errorSintactico = true;
-                                }
-                            } else {
-                                resultado += "Se espera ) en " + (p != null ? p.linea : "desconocida") + "\n";
-                                errorSintactico = true;
-                            }
-                        } else {
-                            resultado += "Se espera expresion condicional en " + p.linea + "\n";
-                            errorSintactico = true;
-                        }
-                    } else {
-                        resultado += "Se espera ( en " + p.linea + "\n";
-                        errorSintactico = true;
-                    }
-
+                    procesarIfConCodigo();
                 } else if (p.idToken == 203) //while 
                 {
-                    p = p.sig;
-                    if (p.idToken == 117) //(
-                    {
-                        p = p.sig;
-                        if (checkExpreCond()) {
-                            if (p.idToken == 118) // )
-                            {
-                                p = p.sig;
-                                if (p.idToken == 123) //{
-                                {
-                                    contadorCorchetes++;
-                                    p = p.sig;
-                                    statements();
-                                    if (p.idToken == 124) // }
-                                    {
-                                        contadorCorchetes--;
-                                        p = p.sig;
-
-                                    } else {
-                                        resultado += "Se espera } en " + p.linea + "\n";
-                                        errorSintactico = true;
-                                    }
-                                } else {
-                                    resultado += "Se espera { en " + p.linea + "\n";
-                                    errorSintactico = true;
-                                }
-                            } else {
-                                resultado += "Se espera ) en " + p.linea + "\n";
-                                errorSintactico = true;
-                            }
-                        } else {
-                            resultado += "Se espera expresion en " + p.linea + "\n";
-                            errorSintactico = true;
-                        }
-                    } else {
-                        resultado += "Se espera ( en " + p.linea + "\n";
-                        errorSintactico = true;
-                    }
+                    procesarWhileConCodigo();
                 } else if (p.idToken == 205) { // break
                     p = p.sig;
 
@@ -475,7 +344,8 @@ private void checkDeclaracionVariable() {
     p = p.sig;
 
     if (p.idToken == 100) { // Identificador
-        insertarVariable(p.lexema, tipoVariableActual);
+        String nombreVariable = p.lexema;
+        insertarVariable(nombreVariable, tipoVariableActual);
         p = p.sig;
         
         if (p.idToken == 120) { // ,
@@ -484,26 +354,17 @@ private void checkDeclaracionVariable() {
             if (p.idToken == 113) { // =
                 p = p.sig;
                 
-                // INICIAR NOTACIÓN POLISH PARA EXPRESIÓN
                 enExpresion = true;
                 notacionPolish.limpiar();
                 
                 if (checkExpreSimple()) {
-                    // FINALIZAR EXPRESIÓN Y VALIDAR
                     enExpresion = false;
                     notacionPolish.finalizarExpresion();
-                    
-                    // VALIDAR ASIGNACIÓN (solo si no hay errores previos)
-                    if (!errorSintactico && !notacionPolish.validarAsignacion(tipoVariableActual, p.linea)) {
-                        resultado += notacionPolish.getResultadoValidacion();
-                        errorSintactico = true;
+                    // GENERAR CÓDIGO DE ASIGNACIÓN
+                    if (generarCodigoIntermedio && !errorSintactico) {
+                        String expresionRPN = obtenerExpresionRPN();
+                        generadorCodigo.generarAsignacion(nombreVariable, expresionRPN);
                     }
-                    
-                    // MOSTRAR NOTACIÓN POLISH SOLO SI HAY ERROR
-                    if (errorSintactico) {
-                        mostrarNotacionPolish();
-                    }
-                    
                     if (p.idToken == 121) { // ;
                         p = p.sig;
                     } else {
@@ -522,6 +383,117 @@ private void checkDeclaracionVariable() {
         resultado += "Se espera un identificador en línea " + p.linea + "\n";
         errorSintactico = true;
     }
+}
+// MÉTODOS AUXILIARES PARA GENERACIÓN DE CÓDIGO INTERMEDIO
+private void procesarIfConCodigo() {
+    p = p.sig; // consumir 'if'
+    if (p.idToken == 117) { // (
+        p = p.sig;
+        String condicionRPN = generarRPNCondicional();
+        if (generarCodigoIntermedio) {
+            generadorCodigo.generarExpresion(condicionRPN);
+        }
+        generadorCodigo.iniciarIf(); // Genera BRF L0
+        notacionPolish.limpiar();
+        
+        if (p.idToken == 118) { // )
+            p = p.sig;
+            if (p.idToken == 123) { // {
+                contadorCorchetes++;
+                p = p.sig;
+                
+                // ✅ CORRECCIÓN: PRIMERO procesar el bloque THEN
+                statements(); // Esto genera el código DENTRO del if
+                
+                if (p.idToken == 124) { // }
+                    contadorCorchetes--;
+                    p = p.sig;
+                }
+            }
+            
+            // ✅ CORRECCIÓN: LUEGO generar el salto para evitar el else
+            generadorCodigo.generarThen(); // Genera BRI L1 y L0:
+            
+            // Procesar ELSE si existe
+            if (p != null && p.idToken == 201) { // else
+                p = p.sig;
+                if (p.idToken == 123) { // {
+                    contadorCorchetes++;
+                    p = p.sig;
+                    statements(); // Bloque ELSE
+                    if (p.idToken == 124) { // }
+                        contadorCorchetes--;
+                        p = p.sig;
+                    }
+                }
+            }
+            generadorCodigo.finalizarIf(); // Genera L1:
+        }
+    }
+}
+
+private void procesarWhileConCodigo() {
+    generadorCodigo.iniciarWhile();
+    p = p.sig; // consumir 'while'
+    if (p.idToken == 117) { // (
+        p = p.sig;
+        String condicionRPN = generarRPNCondicional();
+        if (generarCodigoIntermedio) {
+            generadorCodigo.generarExpresion(condicionRPN);
+        }
+        notacionPolish.limpiar(); // Limpiar después de la condición
+        generadorCodigo.generarCondicionWhile();
+        if (p.idToken == 118) { // )
+            p = p.sig;
+            if (p.idToken == 123) { // {
+                contadorCorchetes++;
+                p = p.sig;
+                statements();
+                if (p.idToken == 124) { // }
+                    contadorCorchetes--;
+                    p = p.sig;
+                }
+            }
+            generadorCodigo.finalizarWhile();
+        }
+    }
+}
+
+private void procesarScannerConCodigo() {
+    p = p.sig; // consumir 'scanner'
+    if (p.idToken == 100) { // Identificador
+        String nombreVariable = p.lexema;
+        if (generarCodigoIntermedio) {
+            generadorCodigo.generarScanner(nombreVariable);
+        }
+        notacionPolish.limpiar(); // Limpiar después de scanner
+        p = p.sig;
+        if (p.idToken == 121) { // ;
+            p = p.sig;
+        }
+    }
+}
+
+private String generarRPNCondicional() {
+    notacionPolish.limpiar();
+    enExpresion = true;
+    checkExpreCond();
+    enExpresion = false;
+    notacionPolish.finalizarExpresion();
+    return obtenerExpresionRPN();
+}
+
+private String obtenerExpresionRPN() {
+    StringBuilder sb = new StringBuilder();
+    for (ElementoExpresion elem : notacionPolish.getExpresionPolish()) {
+        sb.append(elem.valor).append(" ");
+    }
+    return sb.toString().trim();
+}
+
+// GETTER PARA EL GENERADOR DE CÓDIGO
+public GeneradorCodigo getGeneradorCodigo() {
+    return generadorCodigo;
 }
     
     private boolean checkOperacionAditiva() {

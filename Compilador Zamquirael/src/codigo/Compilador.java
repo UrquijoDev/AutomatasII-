@@ -256,7 +256,18 @@ public class Compilador extends javax.swing.JFrame {
         sintaxis.sintaxis();
         
         txtA_salida.append(sintaxis.resultado);
-        
+        // MOSTRAR CÓDIGO INTERMEDIO
+        if (!sintaxis.errorSintactico) {
+            mostrarCodigoIntermedio();
+        }
+    }
+
+    private void mostrarCodigoIntermedio() {
+        GeneradorCodigo genCodigo = sintaxis.getGeneradorCodigo();
+        if (genCodigo != null && !genCodigo.getCodigoIntermedio().isEmpty()) {
+            txtA_salida.append("\n=== CÓDIGO INTERMEDIO (NOTACIÓN POLACA) ===\n");
+            txtA_salida.append(genCodigo.getCodigoComoString());
+        }
     }
 
     private void llenarTablaTokens() {
