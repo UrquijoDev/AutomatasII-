@@ -192,6 +192,12 @@ public class Sintactico {
                         if (checkExpreSimple()) {
                             enExpresion = false;
                             notacionPolish.finalizarExpresion();
+                            int tipoVar = obtenerTipoVariable(nombreVariable);
+                            if (!errorSintactico && !notacionPolish.validarAsignacion(tipoVar, (p != null ? p.linea : renglon))) {
+                                resultado += notacionPolish.getResultadoValidacion();
+                                errorSintactico = true;
+                            }
+                            
                             // GENERAR CÓDIGO DE ASIGNACIÓN
                             if (generarCodigoIntermedio && !errorSintactico) {
                                 String expresionRPN = obtenerExpresionRPN();
@@ -360,6 +366,11 @@ private void checkDeclaracionVariable() {
                 if (checkExpreSimple()) {
                     enExpresion = false;
                     notacionPolish.finalizarExpresion();
+                    if (!errorSintactico && !notacionPolish.validarAsignacion(tipoVariableActual, p.linea)) {
+                        resultado += notacionPolish.getResultadoValidacion();
+                        errorSintactico = true;
+                    }
+                    
                     // GENERAR CÓDIGO DE ASIGNACIÓN
                     if (generarCodigoIntermedio && !errorSintactico) {
                         String expresionRPN = obtenerExpresionRPN();
