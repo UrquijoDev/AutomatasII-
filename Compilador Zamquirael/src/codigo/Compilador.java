@@ -98,7 +98,9 @@ public class Compilador extends javax.swing.JFrame {
 
         jPanel7.setBackground(java.awt.Color.darkGray);
 
+        tableTokens.setBackground(new java.awt.Color(25, 26, 29));
         tableTokens.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        tableTokens.setForeground(new java.awt.Color(255, 255, 255));
         tableTokens.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -132,7 +134,9 @@ public class Compilador extends javax.swing.JFrame {
 
         jPanel9.setBackground(java.awt.Color.darkGray);
 
+        paneCodigo.setBackground(new java.awt.Color(25, 26, 29));
         paneCodigo.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        paneCodigo.setForeground(new java.awt.Color(255, 255, 255));
         jScrollPane1.setViewportView(paneCodigo);
 
         javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
