@@ -413,7 +413,6 @@ private void procesarIfConCodigo() {
                 contadorCorchetes++;
                 p = p.sig;
                 
-                // ✅ CORRECCIÓN: PRIMERO procesar el bloque THEN
                 statements(); // Esto genera el código DENTRO del if
                 
                 if (p.idToken == 124) { // }
@@ -422,7 +421,6 @@ private void procesarIfConCodigo() {
                 }
             }
             
-            // ✅ CORRECCIÓN: LUEGO generar el salto para evitar el else
             generadorCodigo.generarThen(); // Genera BRI L1 y L0:
             
             // Procesar ELSE si existe
