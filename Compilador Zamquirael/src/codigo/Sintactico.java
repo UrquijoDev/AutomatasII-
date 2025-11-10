@@ -750,16 +750,31 @@ private String obtenerOperador(int token) {
     }
 }
 
-private int obtenerTipoVariable(String nombre) {
-    NodoVar actual = cabezaVar;
-    while (actual != null) {
-        if (actual.nombre.equals(nombre)) {
-            return actual.tipo;
+    // Variables para cache manual de tipo de variable
+    private String ultimaVariableBuscada = null;
+    private int ultimoTipoEncontrado = 0;
+
+    private int obtenerTipoVariable(String nombre) {
+        // Verificar cache primero
+        if (nombre.equals(ultimaVariableBuscada)) {
+            return ultimoTipoEncontrado;
         }
-        actual = actual.sig;
+        // Búsqueda normal si no está en cache
+        NodoVar actual = cabezaVar;
+        while (actual != null) {
+            if (actual.nombre.equals(nombre)) {
+                // Actualizar cache
+                ultimaVariableBuscada = nombre;
+                ultimoTipoEncontrado = actual.tipo;
+                return actual.tipo;
+            }
+            actual = actual.sig;
+        }
+        // Variable no encontrada - actualizar cache también
+        ultimaVariableBuscada = nombre;
+        ultimoTipoEncontrado = 0;
+        return 0;
     }
-    return 0; // indefinido
-}
 
 private void mostrarNotacionPolish() {
     // SOLO MOSTRAR SI HAY ERRORES O SI EL DEBUG ESTÁ ACTIVADO
