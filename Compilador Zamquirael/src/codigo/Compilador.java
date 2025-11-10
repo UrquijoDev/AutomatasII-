@@ -364,8 +364,9 @@ public class Compilador extends javax.swing.JFrame {
         sintaxis.cabeza = lexer.cabeza;
         
         sintaxis.sintaxis();
-        
-        txtA_salida.append(sintaxis.resultado);
+
+        // Agregar salida sintáctica usando el nuevo getter (antes: sintaxis.resultado)
+        txtA_salida.append(sintaxis.getResultado());
         // MOSTRAR CÓDIGO INTERMEDIO
         if (!sintaxis.errorSintactico) {
             mostrarCodigoIntermedio();

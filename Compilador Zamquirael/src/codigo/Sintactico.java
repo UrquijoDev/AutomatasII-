@@ -10,9 +10,9 @@ import java.util.Stack;
 //Checar parentesis abierto y cadena incompleta primera comilla
 public class Sintactico {
 
-        Token cabeza = null, p;
-        boolean errorSintactico = false;
-        String resultado = "\n";
+    Token cabeza = null, p;
+    boolean errorSintactico = false;
+    StringBuilder resultadoBuilder = new StringBuilder("\n");
         int contadorCorchetes = 0;
         boolean esBoolean = false;
 
@@ -42,7 +42,7 @@ public class Sintactico {
     generarCodigoIntermedio = true; // Cambia a false si no quieres generar código
           // Verificar si la lista de tokens está vacía
     if (p == null) {
-        resultado = "Error: No hay tokens para analizar (archivo vacío).\n";
+        resultadoBuilder = new StringBuilder("Error: No hay tokens para analizar (archivo vacío).\n");
         errorSintactico = true;
         return;
     }
@@ -113,7 +113,7 @@ public class Sintactico {
 
                                     } else {
 
-                                        resultado += "Inicio de sentencia invalido en " + p.linea + "\n";
+                                        resultadoBuilder.append("Inicio de sentencia invalido en ").append(p.linea).append("\n");
 
                                         errorSintactico = true;
 
@@ -121,46 +121,46 @@ public class Sintactico {
                                 }
 
                             } else {
-                                resultado += "Se espera { en " + p.linea + "\n";
+                                resultadoBuilder.append("Se espera { en ").append(p.linea).append("\n");
 
                                 errorSintactico = true;
                             }
                         } else {
-                            resultado += "Se espera un identificador en " + p.linea + "\n";
+                            resultadoBuilder.append("Se espera un identificador en ").append(p.linea).append("\n");
                             errorSintactico = true;
                         }
                     } else {
-                        resultado += "Se espera class en " + p.linea + "\n";
+                        resultadoBuilder.append("Se espera class en ").append(p.linea).append("\n");
                         errorSintactico = true;
                     }
                 } else {
-                    resultado += "Se espera ; en " + p.linea + "\n";
+                    resultadoBuilder.append("Se espera ; en ").append(p.linea).append("\n");
                 }
             } else {
-                resultado += "Se espera un identificador en " + p.linea + "\n";
+                resultadoBuilder.append("Se espera un identificador en ").append(p.linea).append("\n");
                 errorSintactico = true;
             }
         } else {
-            resultado += "Se espera package en " + p.linea + "\n";
+            resultadoBuilder.append("Se espera package en ").append(p.linea).append("\n");
             errorSintactico = true;
         }
 
         if (errorSintactico == false) {
             if (contadorCorchetes == 0) {
                 errorSintactico = false;
-                resultado += "\n/////////////Analisis Sintactico Terminado/////////////";
+                resultadoBuilder.append("\n/////////////Analisis Sintactico Terminado/////////////");
 
             }
 
             if (contadorCorchetes < 0) {
-                resultado += "Sobran " + contadorCorchetes * -1 + " corchetes\n";
+                resultadoBuilder.append("Sobran ").append(contadorCorchetes * -1).append(" corchetes\n");
                 errorSintactico = true;
 
             }
 
             if (contadorCorchetes > 0) {
 
-                resultado += "Falta cerrar " + contadorCorchetes + " corchetes\n";
+                resultadoBuilder.append("Falta cerrar ").append(contadorCorchetes).append(" corchetes\n");
 
                 errorSintactico = true;
             }
@@ -178,7 +178,7 @@ public class Sintactico {
                 {
                     // Verificar si la variable está declarada en el lado izquierdo
                     if (!existeVariable(p.lexema)) {
-                        resultado += "Error semántico: Variable '" + p.lexema + "' no declarada (línea " + p.linea + ")\n";
+                        resultadoBuilder.append("Error semántico: Variable '").append(p.lexema).append("' no declarada (línea ").append(p.linea).append(")\n");
                         errorSintactico = true;
                     }
                     String nombreVariable = p.lexema;
@@ -194,7 +194,7 @@ public class Sintactico {
                             notacionPolish.finalizarExpresion();
                             int tipoVar = obtenerTipoVariable(nombreVariable);
                             if (!errorSintactico && !notacionPolish.validarAsignacion(tipoVar, (p != null ? p.linea : renglon))) {
-                                resultado += notacionPolish.getResultadoValidacion();
+                                resultadoBuilder.append(notacionPolish.getResultadoValidacion());
                                 errorSintactico = true;
                             }
                             
@@ -211,12 +211,12 @@ public class Sintactico {
                                     p = p.sig;
                                 }
                             } else {
-                                resultado += "Se espera ; en " + renglon + "\n";
+                                resultadoBuilder.append("Se espera ; en ").append(renglon).append("\n");
                                 errorSintactico = true;
                             }
                         }
                     } else {
-                        resultado += "Se espera = en " + p.linea + "\n";
+                        resultadoBuilder.append("Se espera = en ").append(p.linea).append("\n");
                         errorSintactico = true;
                     }
                 } // Fin de asignacion de variable 
@@ -233,7 +233,7 @@ public class Sintactico {
                             // VERIFICAR SI ES UN IDENTIFICADOR Y SI ESTÁ DECLARADO
                             if (p.idToken == 100) { 
                                 if (!existeVariable(p.lexema)) {
-                                    resultado += "Error semántico: Variable '" + p.lexema + "' no declarada (línea " + p.linea + ")\n";
+                                    resultadoBuilder.append("Error semántico: Variable '").append(p.lexema).append("' no declarada (línea ").append(p.linea).append(")\n");
                                     errorSintactico = true;
                                 }
                             }
@@ -249,20 +249,20 @@ public class Sintactico {
                                 {
                                     p = p.sig;
                                 } else {
-                                    resultado += "Se espera ; en la linea " + p.linea + "\n";
+                                    resultadoBuilder.append("Se espera ; en la linea ").append(p.linea).append("\n");
                                     errorSintactico = true;
                                 }
                             } else {
-                               resultado += "Se espera ) en " + (p != null ? p.linea : "desconocida") + "\n";
+                               resultadoBuilder.append("Se espera ) en ").append(p != null ? p.linea : "desconocida").append("\n");
                                 errorSintactico = true;
                             }
                         } else {
-                            resultado += "Se espera un identificador o cadena valida en linea " + _renglon + "\n";
+                            resultadoBuilder.append("Se espera un identificador o cadena valida en linea ").append(_renglon).append("\n");
                             errorSintactico = true;
                         }
 
                     } else {
-                        resultado += "Se espera ( en la linea " + p.linea + "\n";
+                        resultadoBuilder.append("Se espera ( en la linea ").append(p.linea).append("\n");
                         errorSintactico = true;
                     }
                 } // fin de print
@@ -282,7 +282,7 @@ public class Sintactico {
                     if (p.idToken == 121) { // ;
                         p = p.sig;
                     } else {
-                        resultado += "Se espera ; en la linea " + p.linea + "\n";
+                        resultadoBuilder.append("Se espera ; en la linea ").append(p.linea).append("\n");
                         errorSintactico = true;
                     }
                 } else if (p.idToken == 204) { // return
@@ -291,7 +291,7 @@ public class Sintactico {
                     if (p.idToken == 121) { // ;
                         p = p.sig;
                     } else {
-                        resultado += "Se espera ; en la linea " + p.linea + "\n";
+                        resultadoBuilder.append("Se espera ; en la linea ").append(p.linea).append("\n");
                         errorSintactico = true;
                     }
                 } else {
@@ -330,7 +330,7 @@ public class Sintactico {
 
     private void insertarVariable(String nombre, int tipo) {
         if (existeVariable(nombre)) {
-            resultado += "Error semántico: Variable '" + nombre + "' ya declarada (línea " + p.linea + ")\n";
+            resultadoBuilder.append("Error semántico: Variable '").append(nombre).append("' ya declarada (línea ").append(p.linea).append(")\n");
             errorSintactico = true;
             return;
         }
@@ -367,7 +367,7 @@ private void checkDeclaracionVariable() {
                     enExpresion = false;
                     notacionPolish.finalizarExpresion();
                     if (!errorSintactico && !notacionPolish.validarAsignacion(tipoVariableActual, p.linea)) {
-                        resultado += notacionPolish.getResultadoValidacion();
+                        resultadoBuilder.append(notacionPolish.getResultadoValidacion());
                         errorSintactico = true;
                     }
                     
@@ -379,19 +379,19 @@ private void checkDeclaracionVariable() {
                     if (p.idToken == 121) { // ;
                         p = p.sig;
                     } else {
-                        resultado += "Se espera ; en " + p.linea + "\n";
+                        resultadoBuilder.append("Se espera ; en ").append(p.linea).append("\n");
                         errorSintactico = true;
                     }
                 }
             } else if (p.idToken == 121) { // ;
                 p = p.sig;
             } else {
-                resultado += "Se espera = o ; en " + p.linea + "\n";
+                resultadoBuilder.append("Se espera = o ; en ").append(p.linea).append("\n");
                 errorSintactico = true;
             }
         }
     } else {
-        resultado += "Se espera un identificador en línea " + p.linea + "\n";
+        resultadoBuilder.append("Se espera un identificador en línea ").append(p.linea).append("\n");
         errorSintactico = true;
     }
 }
@@ -535,7 +535,7 @@ public GeneradorCodigo getGeneradorCodigo() {
     
     if (p.idToken == 100) { // id
         if (!variableDeclarada(p.lexema)) {
-            resultado += "Error semántico: Variable '" + p.lexema + "' no declarada (línea " + p.linea + ")\n";
+            resultadoBuilder.append("Error semántico: Variable '").append(p.lexema).append("' no declarada (línea ").append(p.linea).append(")\n");
             errorSintactico = true;
         } else {
             // AGREGAR A NOTACIÓN POLISH
@@ -593,7 +593,7 @@ private boolean checkExpreSimple() {
             p = p.sig;
             
             if (!checkTermino()) {
-                resultado += "Se espera término en " + p.linea + "\n";
+                resultadoBuilder.append("Se espera término en ").append(p.linea).append("\n");
                 errorSintactico = true;
                 return false;
             }
@@ -604,8 +604,8 @@ private boolean checkExpreSimple() {
         esBoolean = true;
     } else {
         // Si no es término ni booleano, podría ser un error
-        if (p != null && p.idToken != 118 && p.idToken != 121) { // No es ) o ;
-            resultado += "Se espera expresión simple en " + p.linea + "\n";
+            if (p != null && p.idToken != 118 && p.idToken != 121) { // No es ) o ;
+            resultadoBuilder.append("Se espera expresión simple en ").append(p.linea).append("\n");
             errorSintactico = true;
         }
     }
@@ -652,7 +652,7 @@ private boolean checkExpreSimple() {
             TerminoEncontrado = true;
             p = p.sig;
         } else {
-            resultado += "Se espera factor en " + p.linea + "\n";
+            resultadoBuilder.append("Se espera factor en ").append(p.linea).append("\n");
             errorSintactico = true;
         }
     }
@@ -683,7 +683,7 @@ private boolean checkExpreCond() {
                     // Continuar procesando
                 } else {
                     errorSintactico = true;
-                    resultado += "Se espera expresión simple después del operador relacional en línea " + p.linea + "\n";
+                    resultadoBuilder.append("Se espera expresión simple después del operador relacional en línea ").append(p.linea).append("\n");
                     break;
                 }
             } else if (checkOperacionLogica()) {
@@ -697,7 +697,7 @@ private boolean checkExpreCond() {
                     // Continuar procesando
                 } else {
                     errorSintactico = true;
-                    resultado += "Se espera expresión simple después del operador lógico en línea " + p.linea + "\n";
+                    resultadoBuilder.append("Se espera expresión simple después del operador lógico en línea ").append(p.linea).append("\n");
                     break;
                 }
             }
@@ -709,7 +709,7 @@ private boolean checkExpreCond() {
         
         // VALIDAR QUE SEA BOOLEAN (solo si no hay errores previos)
         if (!errorSintactico && !notacionPolish.validarCondicional(p.linea)) {
-            resultado += notacionPolish.getResultadoValidacion();
+            resultadoBuilder.append(notacionPolish.getResultadoValidacion());
             errorSintactico = true;
         }
         
@@ -719,7 +719,7 @@ private boolean checkExpreCond() {
         }
     } else {
         errorSintactico = true;
-        resultado += "Se espera expresión condicional en línea " + p.linea + "\n";
+        resultadoBuilder.append("Se espera expresión condicional en línea ").append(p.linea).append("\n");
     }
     
     return expresionCondicional;
@@ -765,18 +765,23 @@ private void mostrarNotacionPolish() {
     // SOLO MOSTRAR SI HAY ERRORES O SI EL DEBUG ESTÁ ACTIVADO
     if (errorSintactico || debugPolish) {
         if (!notacionPolish.getExpresionPolish().isEmpty()) {
-            resultado += "Notación Polish: ";
+            resultadoBuilder.append("Notación Polish: ");
             for (ElementoExpresion elem : notacionPolish.getExpresionPolish()) {
-                resultado += elem.valor + " ";
+                resultadoBuilder.append(elem.valor).append(" ");
             }
-            resultado += "\n";
-            
+            resultadoBuilder.append("\n");
+
             // Si hay errores de validación, mostrarlos también
             if (!notacionPolish.getResultadoValidacion().isEmpty()) {
-                resultado += notacionPolish.getResultadoValidacion();
+                resultadoBuilder.append(notacionPolish.getResultadoValidacion());
             }
         }
     }
 }
-    
+
+// Devuelve el resultado del análisis como String
+public String getResultado() {
+    return resultadoBuilder.toString();
+}
+
 }
