@@ -1,8 +1,5 @@
 package codigo;
 
-import java.util.ArrayList;
-import java.util.Stack;
-
 /**
  *
  * @author Rocapez
@@ -200,8 +197,8 @@ public class Sintactico {
                             
                             // GENERAR CÓDIGO DE ASIGNACIÓN
                             if (generarCodigoIntermedio && !errorSintactico) {
-                                String expresionRPN = obtenerExpresionRPN();
-                                generadorCodigo.generarAsignacion(nombreVariable, expresionRPN);
+                                // Pasar la lista de objetos RPN a GeneradorCodigo (flujo Usar-Modificar-Reusar)
+                                generadorCodigo.generarAsignacion(nombreVariable, notacionPolish.getExpresionPolish());
                             }
                             if (p.idToken == 121) // ; 
                             {
@@ -373,8 +370,7 @@ private void checkDeclaracionVariable() {
                     
                     // GENERAR CÓDIGO DE ASIGNACIÓN
                     if (generarCodigoIntermedio && !errorSintactico) {
-                        String expresionRPN = obtenerExpresionRPN();
-                        generadorCodigo.generarAsignacion(nombreVariable, expresionRPN);
+                        generadorCodigo.generarAsignacion(nombreVariable, notacionPolish.getExpresionPolish());
                     }
                     if (p.idToken == 121) { // ;
                         p = p.sig;
@@ -400,9 +396,10 @@ private void procesarIfConCodigo() {
     p = p.sig; // consumir 'if'
     if (p.idToken == 117) { // (
         p = p.sig;
-        String condicionRPN = generarRPNCondicional();
+        // Obtener la lista RPN para la condición y pasarla al generador
+        generarRPNCondicional();
         if (generarCodigoIntermedio) {
-            generadorCodigo.generarExpresion(condicionRPN);
+            generadorCodigo.generarExpresion(notacionPolish.getExpresionPolish());
         }
         generadorCodigo.iniciarIf(); // Genera BRF L0
         notacionPolish.limpiar();
@@ -446,9 +443,10 @@ private void procesarWhileConCodigo() {
     p = p.sig; // consumir 'while'
     if (p.idToken == 117) { // (
         p = p.sig;
-        String condicionRPN = generarRPNCondicional();
+        // Obtener la lista RPN para la condición y pasarla al generador
+        generarRPNCondicional();
         if (generarCodigoIntermedio) {
-            generadorCodigo.generarExpresion(condicionRPN);
+            generadorCodigo.generarExpresion(notacionPolish.getExpresionPolish());
         }
         notacionPolish.limpiar(); // Limpiar después de la condición
         generadorCodigo.generarCondicionWhile();

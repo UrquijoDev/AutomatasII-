@@ -370,6 +370,8 @@ public class Compilador extends javax.swing.JFrame {
         // MOSTRAR CÓDIGO INTERMEDIO
         if (!sintaxis.errorSintactico) {
             mostrarCodigoIntermedio();
+            // Mostrar también la versión optimizada producida por GeneradorCodigo
+            mostrarCodigoOptimizado();
         }
     }
 
@@ -378,6 +380,14 @@ public class Compilador extends javax.swing.JFrame {
         if (genCodigo != null && !genCodigo.getCodigoIntermedio().isEmpty()) {
             txtA_salida.append("\n=== CÓDIGO INTERMEDIO (NOTACIÓN POLACA) ===\n");
             txtA_salida.append(genCodigo.getCodigoComoString());
+        }
+    }
+
+    private void mostrarCodigoOptimizado() {
+        GeneradorCodigo genCodigo = sintaxis.getGeneradorCodigo();
+        if (genCodigo != null) {
+            txtA_salida.append("\n\n=== CÓDIGO INTERMEDIO (OPTIMIZADO) ===\n");
+            txtA_salida.append(genCodigo.getCodigoOptimizadoComoString());
         }
     }
 
