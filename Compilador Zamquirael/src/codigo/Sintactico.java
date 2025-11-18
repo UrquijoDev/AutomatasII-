@@ -13,17 +13,17 @@ public class Sintactico {
         int contadorCorchetes = 0;
         boolean esBoolean = false;
 
-        // Nuevas variables para tabla de símbolos
+        
         private NodoVar cabezaVar = null;
         private NodoVar punteroVar = null;
 
-        // NUEVAS VARIABLES PARA NOTACIÓN POLISH
+       
         private NotacionPolish notacionPolish;
         private boolean enExpresion;
         private int tipoVariableActual; // Para asignaciones
         private boolean debugPolish = false; // Cambiar a false para no mostrar debug
 
-        // INTEGRACIÓN DE GENERADOR DE CÓDIGO INTERMEDIO
+        
         private GeneradorCodigo generadorCodigo;
         private boolean generarCodigoIntermedio;
     
@@ -34,7 +34,7 @@ public class Sintactico {
     notacionPolish = new NotacionPolish();
     enExpresion = false;
     tipoVariableActual = 0;
-    // INICIALIZAR GENERADOR DE CÓDIGO INTERMEDIO
+  
     generadorCodigo = new GeneradorCodigo();
     generarCodigoIntermedio = true; // Cambia a false si no quieres generar código
           // Verificar si la lista de tokens está vacía
@@ -195,9 +195,9 @@ public class Sintactico {
                                 errorSintactico = true;
                             }
                             
-                            // GENERAR CÓDIGO DE ASIGNACIÓN
+                            // ASIGNACIÓN
                             if (generarCodigoIntermedio && !errorSintactico) {
-                                // Pasar la lista de objetos RPN a GeneradorCodigo (flujo Usar-Modificar-Reusar)
+                                // Pasa la lista de objetos RPN a GeneradorCodigo 
                                 generadorCodigo.generarAsignacion(nombreVariable, notacionPolish.getExpresionPolish());
                             }
                             if (p.idToken == 121) // ; 
@@ -301,8 +301,8 @@ public class Sintactico {
         }
     }
 
-    // NUEVOS MÉTODOS PARA MANEJO DE TABLA DE SÍMBOLOS
-   // Método para verificar si una variable está declarada
+   
+  
     private boolean variableDeclarada(String nombre) {
         NodoVar actual = cabezaVar;
         while (actual != null) {
@@ -391,12 +391,12 @@ private void checkDeclaracionVariable() {
         errorSintactico = true;
     }
 }
-// MÉTODOS AUXILIARES PARA GENERACIÓN DE CÓDIGO INTERMEDIO
+
 private void procesarIfConCodigo() {
     p = p.sig; // consumir 'if'
     if (p.idToken == 117) { // (
         p = p.sig;
-        // Obtener la lista RPN para la condición y pasarla al generador
+        // Obtener la lista RPN para la condición
         generarRPNCondicional();
         if (generarCodigoIntermedio) {
             generadorCodigo.generarExpresion(notacionPolish.getExpresionPolish());
@@ -443,12 +443,12 @@ private void procesarWhileConCodigo() {
     p = p.sig; // consumir 'while'
     if (p.idToken == 117) { // (
         p = p.sig;
-        // Obtener la lista RPN para la condición y pasarla al generador
+        // Obtener la lista RPN para la condición
         generarRPNCondicional();
         if (generarCodigoIntermedio) {
             generadorCodigo.generarExpresion(notacionPolish.getExpresionPolish());
         }
-        notacionPolish.limpiar(); // Limpiar después de la condición
+        notacionPolish.limpiar();
         generadorCodigo.generarCondicionWhile();
         if (p.idToken == 118) { // )
             p = p.sig;
@@ -498,7 +498,7 @@ private String obtenerExpresionRPN() {
     return sb.toString().trim();
 }
 
-// GETTER PARA EL GENERADOR DE CÓDIGO
+
 public GeneradorCodigo getGeneradorCodigo() {
     return generadorCodigo;
 }
