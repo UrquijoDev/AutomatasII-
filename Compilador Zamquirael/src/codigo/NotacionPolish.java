@@ -137,8 +137,14 @@ public class NotacionPolish {
         if (operador.equals("<") || operador.equals(">") || operador.equals("<=") || 
             operador.equals(">=") || operador.equals("==") || operador.equals("!=")) {
             
+            // Números con números
             if ((tipoIzq == 207 || tipoIzq == 208) && (tipoDer == 207 || tipoDer == 208)) 
                 return 209; // número op número = boolean
+
+            // Booleanos con booleanos (SOLO para == y !=)
+            if ((operador.equals("==") || operador.equals("!=")) && 
+                tipoIzq == 209 && tipoDer == 209) 
+                return 209; // booleano op booleano = boolean
             
             resultadoValidacion.append("Error: Tipos incompatibles '")
                               .append(getTipoString(tipoIzq)).append(" ").append(operador)
