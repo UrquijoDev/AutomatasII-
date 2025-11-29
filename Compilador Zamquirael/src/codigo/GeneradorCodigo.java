@@ -34,8 +34,7 @@ public class GeneradorCodigo {
         String rpnOriginalStr = rpnToString(listaRPN);
         codigoIntermedio.add(rpnOriginalStr);
 
-  
-    optimizarRPN(listaRPN);
+        optimizarRPN(listaRPN);
 
        
         String rpnOptimizadaStr = rpnToString(listaRPN);
@@ -83,8 +82,8 @@ public class GeneradorCodigo {
     public void finalizarWhile() {
         String etiquetaFin = pilaEtiquetas.pop();
         String etiquetaInicio = pilaEtiquetas.pop();
-        generar("BRI " + etiquetaInicio); 
-        generar(etiquetaFin + ":"); 
+        generar("BRI " + etiquetaInicio);
+        generar(etiquetaFin + ":");
     }
     
    
@@ -98,8 +97,7 @@ public class GeneradorCodigo {
         String rpnOriginalStr = rpnToString(listaRPN);
         codigoIntermedio.add(variable + " " + rpnOriginalStr + " =");
 
-    
-    optimizarRPN(listaRPN);
+        optimizarRPN(listaRPN);
 
       
         String rpnOptimizadaStr = rpnToString(listaRPN);
@@ -155,15 +153,16 @@ public class GeneradorCodigo {
                 ElementoExpresion e3 = lista.get(i + 2);
                 
 
-                // X puede ser variable o operando 
-                if ((e1.tipoElemento == ElementoExpresion.TIPO_VARIABLE || e1.tipoElemento == ElementoExpresion.TIPO_OPERANDO)
+                // X puede ser variable o operando
+                if ((e1.tipoElemento == ElementoExpresion.TIPO_VARIABLE
+                        || e1.tipoElemento == ElementoExpresion.TIPO_OPERANDO)
                         && e2.esOperando() && e3.esOperador()) {
                     String op = e3.valor;
-                    // Verificar constantes 0 o 1 
+                    // Verificar constantes 0 o 1
                     boolean e2IsZero = (e2.tipoDato == 207 && ("0".equals(e2.valor) || "0.0".equals(e2.valor)));
                     boolean e2IsOne = (e2.tipoDato == 207 && ("1".equals(e2.valor) || "1.0".equals(e2.valor)));
 
-                    //  X 0 + -> X
+                    // X 0 + -> X
                     if (e2IsZero && "+".equals(op)) {
                         
                         lista.remove(i + 2); // e3
@@ -190,11 +189,12 @@ public class GeneradorCodigo {
 
                     // X 0 * -> 0
                     if (e2IsZero && "*".equals(op)) {
-                     
-                        ElementoExpresion cero = new ElementoExpresion(ElementoExpresion.TIPO_OPERANDO, 207, "0", e2.linea);
-                        lista.remove(i); 
-                        lista.remove(i); 
-                        lista.remove(i); 
+
+                        ElementoExpresion cero = new ElementoExpresion(ElementoExpresion.TIPO_OPERANDO, 207, "0",
+                                e2.linea);
+                        lista.remove(i);
+                        lista.remove(i);
+                        lista.remove(i);
                         lista.add(i, cero);
                         huboCambios = true;
                         break;
@@ -222,43 +222,50 @@ public class GeneradorCodigo {
 
                             switch (e3.valor) {
                                 case "+":
-                                    if (tipoResultado == 208) resultadoStr = String.valueOf(v1 + v2);
-                                    else resultadoStr = String.valueOf((long)(v1 + v2));
+                                    if (tipoResultado == 208)
+                                        resultadoStr = String.valueOf(v1 + v2);
+                                    else
+                                        resultadoStr = String.valueOf((long) (v1 + v2));
                                     break;
                                 case "-":
-                                    if (tipoResultado == 208) resultadoStr = String.valueOf(v1 - v2);
-                                    else resultadoStr = String.valueOf((long)(v1 - v2));
+                                    if (tipoResultado == 208)
+                                        resultadoStr = String.valueOf(v1 - v2);
+                                    else
+                                        resultadoStr = String.valueOf((long) (v1 - v2));
                                     break;
                                 case "*":
-                                    if (tipoResultado == 208) resultadoStr = String.valueOf(v1 * v2);
-                                    else resultadoStr = String.valueOf((long)(v1 * v2));
+                                    if (tipoResultado == 208)
+                                        resultadoStr = String.valueOf(v1 * v2);
+                                    else
+                                        resultadoStr = String.valueOf((long) (v1 * v2));
                                     break;
                                 case "/":
                                     double div = v1 / v2;
                                     if (tipoResultado == 207 && v1 % v2 == 0) {
-                                        resultadoStr = String.valueOf((long)div);
+                                        resultadoStr = String.valueOf((long) div);
                                     } else {
                                         resultadoStr = String.valueOf(div);
                                         tipoResultado = 208;
                                     }
                                     break;
                                 default:
-                                    // No soportado 
+                                    // No soportado
                                     continue;
                             }
 
                             // Crear nuevo Elemento con resultado
-                            ElementoExpresion nuevo = new ElementoExpresion(ElementoExpresion.TIPO_OPERANDO, tipoResultado, resultadoStr, e1.linea);
+                            ElementoExpresion nuevo = new ElementoExpresion(ElementoExpresion.TIPO_OPERANDO,
+                                    tipoResultado, resultadoStr, e1.linea);
 
-                            // Reemplazar 
-                            lista.remove(i); 
-                            lista.remove(i);  
-                            lista.remove(i); 
+                            // Reemplazar
+                            lista.remove(i);
+                            lista.remove(i);
+                            lista.remove(i);
                             lista.add(i, nuevo);
                             huboCambios = true;
-                            break; 
+                            break;
                         } catch (NumberFormatException ex) {
-                            
+
                         }
                     }
                 }
@@ -274,4 +281,7 @@ public class GeneradorCodigo {
         return sb.toString().trim();
     }
 
+    public ArrayList<String> getCodigoOptimizado() {
+        return codigoOptimizado;
+    }
 }

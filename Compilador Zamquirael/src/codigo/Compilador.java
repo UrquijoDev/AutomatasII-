@@ -43,13 +43,12 @@ public class Compilador extends javax.swing.JFrame {
     public Compilador() throws IOException {
         initComponents();
         init();
-    btn_compilar.setEnabled(true); // Siempre habilitado
+        btn_compilar.setEnabled(true); // Siempre habilitado
     }
 
     private void init() throws IOException {
         tokens = new ArrayList<>();
 
-     
     }
 
     /**
@@ -102,31 +101,28 @@ public class Compilador extends javax.swing.JFrame {
         tableTokens.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         tableTokens.setForeground(new java.awt.Color(255, 255, 255));
         tableTokens.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
+                new Object[][] {
 
-            },
-            new String [] {
-                "Lexema", "Token", "[Línea]"
-            }
-        ));
+                },
+                new String[] {
+                        "Lexema", "Token", "[Línea]"
+                }));
         jScrollPane2.setViewportView(tableTokens);
 
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
         jPanel7Layout.setHorizontalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 718, Short.MAX_VALUE)
-                .addContainerGap())
-        );
+                jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 718, Short.MAX_VALUE)
+                                .addContainerGap()));
         jPanel7Layout.setVerticalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel7Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 134, Short.MAX_VALUE)
-                .addContainerGap())
-        );
+                jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel7Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 134, Short.MAX_VALUE)
+                                .addContainerGap()));
 
         jPanel3.add(jPanel7, java.awt.BorderLayout.CENTER);
 
@@ -142,30 +138,29 @@ public class Compilador extends javax.swing.JFrame {
         javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
         jPanel9.setLayout(jPanel9Layout);
         jPanel9Layout.setHorizontalGroup(
-            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 718, Short.MAX_VALUE)
-        );
+                jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING,
+                                javax.swing.GroupLayout.DEFAULT_SIZE, 718, Short.MAX_VALUE));
         jPanel9Layout.setVerticalGroup(
-            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 619, Short.MAX_VALUE)
-        );
+                jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 619, Short.MAX_VALUE));
 
         javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
         jPanel8.setLayout(jPanel8Layout);
         jPanel8Layout.setHorizontalGroup(
-            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel8Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
-        );
+                jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel8Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE,
+                                        javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addContainerGap()));
         jPanel8Layout.setVerticalGroup(
-            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel8Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(14, Short.MAX_VALUE))
-        );
+                jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel8Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                        javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(14, Short.MAX_VALUE)));
 
         jPanel3.add(jPanel8, java.awt.BorderLayout.PAGE_START);
 
@@ -185,19 +180,17 @@ public class Compilador extends javax.swing.JFrame {
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
         jPanel6Layout.setHorizontalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, 548, Short.MAX_VALUE)
-                .addContainerGap())
-        );
+                jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, 548, Short.MAX_VALUE)
+                                .addContainerGap()));
         jPanel6Layout.setVerticalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, 773, Short.MAX_VALUE)
-                .addContainerGap())
-        );
+                jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel6Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, 773, Short.MAX_VALUE)
+                                .addContainerGap()));
 
         jPanel4.add(jPanel6);
 
@@ -235,42 +228,40 @@ public class Compilador extends javax.swing.JFrame {
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel5Layout.createSequentialGroup()
-                .addGap(21, 21, 21)
-                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 1264, Short.MAX_VALUE)
-                .addContainerGap())
-        );
+                jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel5Layout.createSequentialGroup()
+                                .addGap(21, 21, 21)
+                                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 1264, Short.MAX_VALUE)
+                                .addContainerGap()));
         jPanel5Layout.setVerticalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 86, Short.MAX_VALUE)
-        );
+                jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 86, Short.MAX_VALUE));
 
         jPanel1.add(jPanel5, java.awt.BorderLayout.PAGE_START);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE,
+                                javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE,
+                                javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btn_compilarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_compilarActionPerformed
+    private void btn_compilarActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btn_compilarActionPerformed
         txtA_salida.setText("");
         compilar();
-    }//GEN-LAST:event_btn_compilarActionPerformed
+    }// GEN-LAST:event_btn_compilarActionPerformed
 
-    private void btn_abrirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_abrirActionPerformed
+    private void btn_abrirActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btn_abrirActionPerformed
         // TODO add your handling code here:
 
-        //examinar
+        // examinar
         JFileChooser chooser = new JFileChooser();
         FileNameExtensionFilter filter = new FileNameExtensionFilter("txt file", "txt");
 
@@ -289,23 +280,24 @@ public class Compilador extends javax.swing.JFrame {
                 e.printStackTrace();
             }
         }
-    }//GEN-LAST:event_btn_abrirActionPerformed
+    }// GEN-LAST:event_btn_abrirActionPerformed
 
- private void compilar() {
-    txtA_salida.setText("");
-    analizadorLexico();
-    llenarTablaTokens();
-    
-    // Verificar si hay tokens antes del análisis sintáctico
-    if (tokens.isEmpty()) {
-        txtA_salida.append("Error: El archivo está vacío.\n");
-        return;
+    private void compilar() {
+        txtA_salida.setText("");
+        analizadorLexico();
+        llenarTablaTokens();
+
+        // Verificar si hay tokens antes del análisis sintáctico
+        if (tokens.isEmpty()) {
+            txtA_salida.append("Error: El archivo está vacío.\n");
+            return;
+        }
+
+        if (!lexer.errorFound) {
+            analizadorSintactico();
+        }
     }
-    
-    if(!lexer.errorFound){
-        analizadorSintactico();
-    } 
-}
+
     private void ReadTxtAreaArchivo() {
         try {
             lexer = new Lexico(archivoPath);
@@ -315,58 +307,57 @@ public class Compilador extends javax.swing.JFrame {
         }
     }
 
-   private void analizadorLexico() {
-    tokens.clear();
-    boolean isTempFile = false;
-    File tempFile = null;
+    private void analizadorLexico() {
+        tokens.clear();
+        boolean isTempFile = false;
+        File tempFile = null;
 
-    try {
-        File codigo;
-        if (archivoPath != null) {
-            codigo = new File(archivoPath);
-        } else {
-            // Crear un archivo temporal
-            tempFile = File.createTempFile("tempCode", ".txt");
-            tempFile.deleteOnExit(); // Asegurar que se elimine al salir
-            archivoPath = tempFile.getAbsolutePath();
-            isTempFile = true;
-            // Escribir el contenido del área de texto en el archivo temporal
-            FileOutputStream output = new FileOutputStream(tempFile);
-            output.write(paneCodigo.getText().getBytes());
+        try {
+            File codigo;
+            if (archivoPath != null) {
+                codigo = new File(archivoPath);
+            } else {
+                // Crear un archivo temporal
+                tempFile = File.createTempFile("tempCode", ".txt");
+                tempFile.deleteOnExit(); // Asegurar que se elimine al salir
+                archivoPath = tempFile.getAbsolutePath();
+                isTempFile = true;
+                // Escribir el contenido del área de texto en el archivo temporal
+                FileOutputStream output = new FileOutputStream(tempFile);
+                output.write(paneCodigo.getText().getBytes());
+                output.close();
+                codigo = tempFile;
+            }
+
+            // Sobrescribir el archivo con el contenido actual del área de texto
+            FileOutputStream output = new FileOutputStream(codigo);
+            byte[] bytesText = paneCodigo.getText().getBytes();
+            output.write(bytesText);
             output.close();
-            codigo = tempFile;
+
+            lexer = new Lexico(archivoPath);
+
+        } catch (IOException ex) {
+            System.out.println("Error al crear archivo temporal... " + ex.getMessage());
+            return;
         }
 
-        // Sobrescribir el archivo con el contenido actual del área de texto
-        FileOutputStream output = new FileOutputStream(codigo);
-        byte[] bytesText = paneCodigo.getText().getBytes();
-        output.write(bytesText);
-        output.close();
+        tokens = lexer.lexico(txtA_salida);
 
-        lexer = new Lexico(archivoPath);
-
-    } catch (IOException ex) {
-        System.out.println("Error al crear archivo temporal... " + ex.getMessage());
-        return;
+        // Eliminar el archivo temporal si se creó
+        if (isTempFile && tempFile != null) {
+            tempFile.delete();
+            archivoPath = null; // Resetear la ruta del archivo
+        }
     }
 
-    tokens = lexer.lexico(txtA_salida);
-
-    // Eliminar el archivo temporal si se creó
-    if (isTempFile && tempFile != null) {
-        tempFile.delete();
-        archivoPath = null; // Resetear la ruta del archivo
-    }
-}
-    
-    private void analizadorSintactico(){
+    private void analizadorSintactico() {
         sintaxis = new Sintactico();
         sintaxis.cabeza = lexer.cabeza;
-        
-        sintaxis.sintaxis();
 
-        // Agregar salida sintáctica usando el nuevo getter (antes: sintaxis.resultado)
+        sintaxis.sintaxis("Final");
         txtA_salida.append(sintaxis.getResultado());
+
         // MOSTRAR CÓDIGO INTERMEDIO
         if (!sintaxis.errorSintactico) {
             mostrarCodigoIntermedio();
@@ -396,12 +387,12 @@ public class Compilador extends javax.swing.JFrame {
 
         // Limpiar tabla
         model.setRowCount(0);
- 
+
         tokens.forEach(token -> {
-            Object[] data = new Object[]{
-                token.getLexema(),
-                token.getidToken(),
-                "[" + token.getLinea() + "]"
+            Object[] data = new Object[] {
+                    token.getLexema(),
+                    token.getidToken(),
+                    "[" + token.getLinea() + "]"
             };
             model.addRow(data);
         });
@@ -412,9 +403,13 @@ public class Compilador extends javax.swing.JFrame {
      */
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+        // <editor-fold defaultstate="collapsed" desc=" Look and feel setting code
+        // (optional) ">
+        /*
+         * If Nimbus (introduced in Java SE 6) is not available, stay with the default
+         * look and feel.
+         * For details see
+         * http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
          */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -424,15 +419,19 @@ public class Compilador extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Compilador.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Compilador.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                    ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Compilador.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Compilador.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                    ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Compilador.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Compilador.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                    ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Compilador.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Compilador.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                    ex);
         }
-        //</editor-fold>
+        // </editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -445,7 +444,6 @@ public class Compilador extends javax.swing.JFrame {
             }
         });
     }
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btn_abrir;
