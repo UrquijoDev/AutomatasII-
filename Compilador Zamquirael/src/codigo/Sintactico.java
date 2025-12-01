@@ -26,7 +26,7 @@ public class Sintactico {
 
     public void sintaxis(String nombreArchivo) {
         p = cabeza;
-        if (p.idToken == 216) //package 
+        if (p.idToken == 216){ //package 
 
         // INICIALIZAR NOTACIÓN POLISH
         notacionPolish = new NotacionPolish();
@@ -41,7 +41,7 @@ public class Sintactico {
             errorSintactico = true;
             return;
         }
-        {
+        
             if (p.sig.idToken == 100) {
                 p = p.sig;
             }
