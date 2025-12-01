@@ -47,7 +47,7 @@ public class GeneradorASM {
             pw.println("\n\t; --- Variables del Usuario ---");
             NodoVar actual = cabezaVar;
             while (actual != null) {
-                // Declaramos todas como DW en 0
+                // Declaramos todas como DW (Word - 16 bits) inicializadas en 0
                 pw.println("\t" + actual.nombre + " DW 0");
                 actual = actual.sig;
             }
@@ -66,20 +66,22 @@ public class GeneradorASM {
                 String[] tokens = linea.split(" ");
 
                 // Analisis por tipo de instruccion
-                // CASO 1: ASIGNACION
+                // CASO 1: ASIGNACION ( ... = )
                 if (linea.endsWith("=")) {
-                    String variableDestino = tokens[0]; 
+                    // La estructura en RPN suele ser: variable valor =
+                    // El valor ya está en la pila (PUSH), solo falta sacarlo
+                    String variableDestino = tokens[0]; // Asumiendo formato "var valor ="
 
                     // Procesamos lo de en medio si hay expresion
                     for (int i = 1; i < tokens.length - 1; i++) {
                         procesarToken(tokens[i], pw);
                     }
 
-                    pw.println("\tPOP AX"); 
-                    pw.println("\tMOV " + variableDestino + ", AX"); 
+                    pw.println("\tPOP AX"); // Sacamos el resultado
+                    pw.println("\tMOV " + variableDestino + ", AX"); // Guardamos en variable
                 }
 
-                // CASO 2: PRINT
+                // CASO 2: PRINT ( ... PRT )
                 else if (linea.endsWith("PRT")) {
                     String valor = tokens[0];
 
@@ -90,10 +92,10 @@ public class GeneradorASM {
                         pw.println("\tMOV AX, " + valor);
                     }
 
-                    
+                    // Usamos las Macros de blue.asm:
                     pw.println("\tITOA BUFFER, AX"); // Convierte AX a texto en BUFFER
-                    pw.println("\tWRITE BUFFER");
-                    pw.println("\tWRITELN"); // 
+                    pw.println("\tWRITE BUFFER"); // Imprime el texto
+                    pw.println("\tWRITELN"); // Salto de linea
                 }
 
                 // CASO 3: SCANNER ( ... SCN )
@@ -155,7 +157,7 @@ public class GeneradorASM {
         } else if (token.equals("/")) {
             pw.println("\tPOP BX");
             pw.println("\tPOP AX");
-            pw.println("\tCWD"); 
+            pw.println("\tCWD"); // Extension de signo necesaria para DIV
             pw.println("\tIDIV BX");
             pw.println("\tPUSH AX");
         }
