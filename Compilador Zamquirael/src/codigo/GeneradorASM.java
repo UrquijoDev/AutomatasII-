@@ -7,29 +7,26 @@ import java.util.ArrayList;
 
 public class GeneradorASM {
 
-    // Variables globales para etiquetas
     private int labelCounter = 0;
 
     public void generarArchivoASM(String nombreArchivo, ArrayList<String> codigoOptimizado, NodoVar cabezaVar) {
-        // Agregamos .asm al nombre si no lo tiene
         if (!nombreArchivo.endsWith(".asm")) {
             nombreArchivo += ".asm";
         }
 
         try (FileWriter fw = new FileWriter(nombreArchivo);
                 PrintWriter pw = new PrintWriter(fw)) {
+            
+            //Encabezados 
             pw.println("; Archivo generado por el Compilador");
-            pw.println("INCLUDE MACROS.MAC"); // OJO: Extension correcta .MAC
+            pw.println("INCLUDE MACROS.MAC");
             pw.println("DOSSEG");
             pw.println(".MODEL SMALL");
             pw.println(".STACK 100h");
 
-            // 2. SEGMENTO DE DATOS
 
+            //Segmento de datos
             pw.println(".DATA");
-
-            // A) VARIABLES DE SISTEMA 
-            pw.println("\t; --- Variables internas para Macros ---");
             pw.println("\tBUFFER      DB 8 DUP('$')");
             pw.println("\tBUFFERTEMP  DB 8 DUP('$')");
             pw.println("\tBLANCO      DB '#'");
@@ -43,81 +40,131 @@ public class GeneradorASM {
             pw.println("\tINTRODUCIDOS DB 254 DUP ('$')");
             pw.println("\tMULT10      DW 1");
 
-            // B) VARIABLES DE USUARIO
             pw.println("\n\t; --- Variables del Usuario ---");
             NodoVar actual = cabezaVar;
             while (actual != null) {
-                // Declaramos todas como DW (Word - 16 bits) inicializadas en 0
-                pw.println("\t" + actual.nombre + " DW 0");
+                // Si es String arreglo de bytes grande.
+                // Si es número necesitamos 2 bytes.
+                if (actual.tipo == 210) { 
+                    pw.println("\t" + actual.nombre + " DB 255 DUP('$')");
+                } else {
+                    pw.println("\t" + actual.nombre + " DW 0");
+                }
                 actual = actual.sig;
             }
 
-            // 3. SEGMENTO DE CODIGO
+            //Segmento de codigo
             pw.println("\n.CODE");
             pw.println(".386");
             pw.println("BEGIN:");
             pw.println("\tMOV AX, @DATA");
             pw.println("\tMOV DS, AX");
 
-            // 4. PROCESAMIENTO DEL CODIGO (RPN)
+            // Recorremos el código intermedio 
             for (String linea : codigoOptimizado) {
-                pw.println("\n\t; " + linea); // Comentario para debug
-
+                pw.println("\n\t; " + linea);
                 String[] tokens = linea.split(" ");
 
-                // Analisis por tipo de instruccion
-                // CASO 1: ASIGNACION ( ... = )
+                
+                //Asignaciones
                 if (linea.endsWith("=")) {
-                    // La estructura en RPN suele ser: variable valor =
-                    // El valor ya está en la pila (PUSH), solo falta sacarlo
-                    String variableDestino = tokens[0]; // Asumiendo formato "var valor ="
-
-                    // Procesamos lo de en medio si hay expresion
-                    for (int i = 1; i < tokens.length - 1; i++) {
-                        procesarToken(tokens[i], pw);
+                    String variableDestino = tokens[0];
+                    
+                    boolean esAsignacionString = false;
+                    String valorString = "";
+                    
+                    // Detectamos si asignamos texto 
+                    for(String t : tokens) {
+                        if(t.startsWith("\"") || t.startsWith("'")) {
+                            esAsignacionString = true;
+                            //espacios intermedios
+                            int inicio = linea.indexOf(t);
+                            int fin = linea.lastIndexOf("=");
+                            valorString = linea.substring(inicio, fin).trim();
+                            break;
+                        }
                     }
 
-                    pw.println("\tPOP AX"); // Sacamos el resultado
-                    pw.println("\tMOV " + variableDestino + ", AX"); // Guardamos en variable
+                    if (esAsignacionString) {
+                        //Asignación de String.
+                        String textoLimpio = valorString.replace("\"", "").replace("'", "");
+                        pw.println("\t; Asignando string letra por letra a " + variableDestino);
+                        
+                        for (int i = 0; i < textoLimpio.length(); i++) {
+                            char c = textoLimpio.charAt(i);
+                            pw.println("\tMOV " + variableDestino + "[" + i + "], '" + c + "'");
+                        }
+                        //Marcar el final del string con '$'
+                        pw.println("\tMOV " + variableDestino + "[" + textoLimpio.length() + "], '$'");
+                    } 
+                    else {
+                        //Asignación numérica normal
+                        for (int i = 1; i < tokens.length - 1; i++) {
+                            procesarToken(tokens[i], pw);
+                        }
+                        pw.println("\tPOP AX");
+                        pw.println("\tMOV " + variableDestino + ", AX");
+                    }
                 }
-
-                // CASO 2: PRINT ( ... PRT )
+                
+                // print 
                 else if (linea.endsWith("PRT")) {
-                    String valor = tokens[0];
+                    String valor = tokens[0]; 
 
-                    // Si es variable o numero, lo movemos a AX
-                    if (esNumero(valor)) {
-                        pw.println("\tMOV AX, " + valor);
-                    } else {
-                        pw.println("\tMOV AX, " + valor);
+                    //Es texto 
+                    if (valor.startsWith("\"") || valor.startsWith("'")) {
+                         String textoLimpio = linea.substring(0, linea.lastIndexOf("PRT")).trim().replace("\"", "").replace("'", "");
+                         // Imprimimos caracter por caracter 
+                         for (int i = 0; i < textoLimpio.length(); i++) {
+                            pw.println("\tMOV AH, 02h");
+                            pw.println("\tMOV DL, '" + textoLimpio.charAt(i) + "'");
+                            pw.println("\tINT 21h");
+                         }
+                         pw.println("\tWRITELN");
                     }
-
-                    // Usamos las Macros de blue.asm:
-                    pw.println("\tITOA BUFFER, AX"); // Convierte AX a texto en BUFFER
-                    pw.println("\tWRITE BUFFER"); // Imprime el texto
-                    pw.println("\tWRITELN"); // Salto de linea
+                    //saber si es String o Numero
+                    else if (!esNumero(valor)) {
+                        int tipo = obtenerTipoVar(valor, cabezaVar);
+                        
+                        if (tipo == 210) { //Es variable string
+                            pw.println("\t; Imprimiendo variable string");
+                            pw.println("\tLEA DX, " + valor); // Cargamos la dirección de memoria
+                            pw.println("\tMOV AH, 09h");      // Usamos función 09h Imprimir cadena
+                            pw.println("\tINT 21h");
+                            pw.println("\tWRITELN");
+                        } else {
+                            //variable NUMÉRICA 
+                            pw.println("\tMOV AX, " + valor);
+                            pw.println("\tITOA BUFFER, AX");
+                            pw.println("\tWRITE BUFFER");
+                            pw.println("\tWRITELN");
+                        }
+                    }
+                    // Es un número
+                    else {
+                        pw.println("\tMOV AX, " + valor);
+                        pw.println("\tITOA BUFFER, AX");
+                        pw.println("\tWRITE BUFFER");
+                        pw.println("\tWRITELN");
+                    }
                 }
-
-                // CASO 3: SCANNER ( ... SCN )
+                // scanner
                 else if (linea.endsWith("SCN")) {
                     String variable = tokens[0];
-                    // Usamos Macros de blue.asm
-                    pw.println("\tREAD"); // Lee teclado
-                    pw.println("\tATOI " + variable); // Convierte a numero y guarda en variable
+                    pw.println("\tREAD");
+                    pw.println("\tATOI " + variable);
                 }
-
-                // CASO 4: ETIQUETAS Y SALTOS
+                //Etiquetas y Saltos
                 else if (linea.endsWith(":")) {
-                    pw.println(linea); // L1:
-                } else if (linea.startsWith("BRF")) { // Branch if False
+                    pw.println(linea);
+                } else if (linea.startsWith("BRF")) {
                     pw.println("\tPOP AX");
                     pw.println("\tCMP AX, 0");
-                    pw.println("\tJE " + tokens[1]); // Salta si es 0 (Falso)
-                } else if (linea.startsWith("BRI")) { // Salto incondicional
+                    pw.println("\tJE " + tokens[1]);
+                } else if (linea.startsWith("BRI")) {
                     pw.println("\tJMP " + tokens[1]);
                 }
-
-                // CASO 5: EXPRESIONES NORMALES (5 3 +)
+                //EXPRESIONES MATEMÁTICAS
                 else {
                     for (String token : tokens) {
                         procesarToken(token, pw);
@@ -125,7 +172,7 @@ public class GeneradorASM {
                 }
             }
 
-            // 5. CIERRE
+            // Fin
             pw.println("\n\tMOV AX, 4C00h");
             pw.println("\tINT 21h");
             pw.println("END BEGIN");
@@ -137,8 +184,33 @@ public class GeneradorASM {
         }
     }
 
-    // Metodo auxiliar para procesar operadores y operandos
+
+    // buscar el tipo de dato 
+    private int obtenerTipoVar(String nombre, NodoVar cabeza) {
+        NodoVar actual = cabeza;
+        while(actual != null) {
+            if(actual.nombre.equals(nombre)) {
+                return actual.tipo;
+            }
+            actual = actual.sig;
+        }
+        return -1; 
+    }
+
+    // Método para procesar operaciones matemáticas
     private void procesarToken(String token, PrintWriter pw) {
+        
+        //traducimos a enteros.
+        if (token.equals("true")) token = "1";
+        else if (token.equals("false")) token = "0";
+
+        if (token.matches("-?\\d+\\.\\d+")) {
+            token = token.substring(0, token.indexOf(".")); // Truncar decimales
+        }
+
+        if (token.startsWith("\"") || token.startsWith("'")) return;
+
+        // Traducción de operadores 
         if (token.equals("+")) {
             pw.println("\tPOP BX");
             pw.println("\tPOP AX");
@@ -157,26 +229,20 @@ public class GeneradorASM {
         } else if (token.equals("/")) {
             pw.println("\tPOP BX");
             pw.println("\tPOP AX");
-            pw.println("\tCWD"); // Extension de signo necesaria para DIV
+            pw.println("\tCWD");
             pw.println("\tIDIV BX");
             pw.println("\tPUSH AX");
         }
-        // Operadores Relacionales (Producen 1 o 0)
-        else if (token.equals(">")) {
-            comparar(pw, "JG");
-        } else if (token.equals("<")) {
-            comparar(pw, "JL");
-        } else if (token.equals("==")) {
-            comparar(pw, "JE");
-        } else if (token.equals("!=")) {
-            comparar(pw, "JNE");
-        }
-        // Numeros y Variables
+        // Operadores Relacionales
+        else if (token.equals(">")) { comparar(pw, "JG"); }
+        else if (token.equals("<")) { comparar(pw, "JL"); }
+        else if (token.equals("==")) { comparar(pw, "JE"); }
+        else if (token.equals("!=")) { comparar(pw, "JNE"); }
+        // Operandos van a la pila
         else if (esNumero(token)) {
             pw.println("\tMOV AX, " + token);
             pw.println("\tPUSH AX");
         } else if (!token.equals("=") && !token.equals("PRT") && !token.equals("SCN") && !token.startsWith("L")) {
-            // Asumimos que es variable si no es palabra reservada
             pw.println("\tMOV AX, " + token);
             pw.println("\tPUSH AX");
         }
